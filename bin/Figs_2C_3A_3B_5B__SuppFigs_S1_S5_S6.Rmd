@@ -1,0 +1,1388 @@
+---
+title: "Figures 2C, 3A, 3B, 5B, and Supplementary Figures S1, S5 and S6"
+author: "Kristine A. Tsantilas, PhD"
+date: "06/03/2023"
+output: 
+  html_document:
+      code_folding: hide
+      toc: true
+      toc_float:
+        collapsed: false
+---
+
+
+
+# Overview {.tabset .tabset-fade}
+
+
+## Experiments
+
+Data from three separate experiments to generate 6 figure panels were assessed in this R markdown:
+
+* Characterization of Mag-Net enriched membrane particles
+
+* Matrix-matched calibration curve (MMCC)
+
+* Assessing impact of plasma freeze-thaw cycles
+
+<br/><br/>
+
+## Mag-Net enrichment
+
+Characterization of Mag-Net enrichment of circulating membrane particles.
+
+* Figure 2C
+  
+* Figure 3A
+  
+* Figure 3B
+  
+* Supplementary Figure S1
+
+<br/><br/>
+
+## MMCC  
+
+Matrix-matched calibration curve used human plasma diluted with chicken plasma to assess figures of merit in peptides and proteins isolated using Mag-Net.
+
+* Figure 5B
+    
+* Supplementary Figure S5
+
+<br/><br/>
+
+## Freeze-thaws
+
+Assessing the impact of repeated plasma freeze-thaw cycles on Mag-Net enrichment
+
+* Supplementary Figure S6
+
+<br/><br/>
+
+# Script {.tabset .tabset-fade}
+
+## Input
+
+Data and metadata from three separate experiments are needed to run the R markdown. 
+
+* Characterization of Mag-Net enriched membrane particles
+
+  - group-fc-Beads-SAXN-Particles vs HydN-Plasma-EncV2score-QuantReport_2023-03-05_13-29-41.csv
+
+  - Protein_List.csv
+
+* Matrix-matched calibration curve (MMCC)
+
+  - MMCC_EV_Eclipse_Peptide_Long_TAF_NoNorm.csv
+    
+  - MMCC_EV_Eclipse_Protein_Long_ProtAb_NoNorm.csv
+    
+  - MMCC_EV_Eclipse_figuresofmerit_proteins_NoNorm.csv
+  
+  - MMCC_EV_Eclipse_files_meta.csv
+  
+  - Protein_List.csv
+    
+* Assessing impact of plasma freeze-thaw cycles
+  
+  - FT_TICnormalized_LongForm_Peptide_NormArea_Long.csv
+
+  - FT_LongForm_Reps_Meta.csv
+
+
+<br/><br/>
+
+## Output
+
+This script produces:
+
+* An HTML format R Markdown file that includes the experimental data, code detailed here, and print-outs of figures.
+
+* Figures (as .svg files): 
+
+  - Figure 2C (Volcano plot)
+  
+  - Figure 3A (Enriched markers in Mag-Net)
+  
+  - Figure 3B (Depleted markers in Mag-Net)
+  
+  - Figure 5B (All peptide Log~2~ratios relative to 100% human plasma)
+  
+  - Supplementary Figure S1 (Labeled volcano plot)
+  
+  - Supplementary Figure S5 (Individual protein abundance panels - CD9, NCAM1 and APOB as separate files )
+  
+  - Supplementary Figure S6 (Freeze thaw ratio relative to 1 freeze thaw cycle)
+ 
+* Various .csv files with subset of code steps
+
+  - Enrich/Deplet: List of proteins identified with a fold change
+  
+  - Enrich/Deplet:List of proteins enriched after Mag-Net with a fold change > 2 and a p-value < 0.05
+  
+  - Enrich/Deplet: List of proteins depleted after Mag-Net with a fold change < 0.5 and a p-value < 0.05
+  
+  - MMCC: List of replicate Log2ratios and other parameters of A%/A[100]% at peptide level
+  
+  - MMCC: List of replicate Log2ratios and other parameters of A%/A[100]% at protein level
+
+  - MMCC: List of average Log2ratios and other parameters of A%/A[100]% at peptide level
+  
+  - MMCC: List of average Log2ratios and other parameters of A%/A[100]% at protein level
+  
+  - FT: List of replicate Log2ratios and other parameters of XFT/1FT at peptide level
+  
+  - FT: List of average Log2ratios and other parameters of XFT/1FT at peptide level
+
+
+
+<br/><br/>
+
+
+## Software Information
+
+* Skyline Daily (64-bit)
+
+* R version: 4.1.2
+
+* R Studio version: 2023.03.0+386 "Cherry Blossom" Release (3c53477afb13ab959aeb5b34df1f10c237b256c3, 2023-03-09) for Windows
+Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) RStudio/2023.03.0+386 Chrome/108.0.5359.179 Electron/22.0.3 Safari/537.36
+
+* Packages required: 
+
+  + dplyr (version 1.1.2)
+  
+  + stringr (version 1.5.0)
+  
+  + tidyr (version 1.3.0)
+  
+  + matrixStats (version 0.62.0)
+  
+  + ggplot2 (version 3.4.1)
+  
+  + ggrepel (version 0.9.3)
+  
+  + PupillometryR (version 0.0.4)
+  
+  + RColorBrewer (version 1.1-3)
+  
+  + knitr (version 1.36)
+  
+  + kableExtra (version 1.3.4)
+  
+  + scales (version 1.2.1)
+
+<br/><br/>
+
+
+```{r package_installation, include=FALSE}
+# Download necessary packages for analysis
+library(dplyr)
+library(stringr)
+library(tidyr)
+library(matrixStats)
+library(ggplot2)
+library(ggrepel)
+library(PupillometryR)
+library(RColorBrewer)
+library(knitr)
+library(kableExtra)
+library(scales)
+
+# Check session info
+sessionInfo()
+
+```
+
+```{r setup, include=FALSE}
+# Setting global options for all code chunks
+knitr::opts_knit$set(echo = TRUE, root.dir = 'C:\\Users\\Kristine\\Desktop\\Research\\05_PlasmaECVs\\MagNet_ChrisWu\\script')
+
+# Set-up current date to include in filename output
+(today <- Sys.Date())
+basename <- today %>%
+            format(., "%Y%b%d") %>% # with month as a word
+            paste0(.,"_")
+
+# Set-up base filenames by dataset to classify filename output
+enrichdeplet <- "EnrichDeplet_TIC_"
+freezeinfo <- "FT_TIC_"
+matrixinfo <- "MMCC_NoNorm_"
+
+
+```
+
+
+<br/><br/>
+
+## File Import
+
+Importing files from enrichment/depletion experiment, matched-matrix calibration curve, and freeze-thaw experiments.
+
+```{r files}
+# Import organizer containing proteins of interest
+        organizer <- read.csv("input\\Protein_List.csv", 
+                              header = TRUE,
+                              na.strings="#N/A",
+                              sep = ",")
+
+# Data to generate enrichment/depletion plots and volcano plots
+        AllGroups_FC <- read.csv("input\\group-fc-Beads-SAXN-Particles vs HydN-Plasma-EncV2score-QuantReport_2023-03-05_13-29-41.csv", 
+                              header = TRUE,
+                              na.strings="#N/A",
+                              sep = ",")    
+ 
+# Matched-Matrix Calibration Curve data
+    # Total area fragment (No normalization)
+        MM_peptides <- read.csv("input\\MMCC_EV_Eclipse_Peptide_Long_TAF_NoNorm.csv",
+                              header = TRUE,
+                              na.strings="#N/A",
+                              sep = ",")
+    # Protein abundance
+       MM_proteins <- read.csv("input\\MMCC_EV_Eclipse_Protein_Long_ProtAb_NoNorm.csv",
+                              header = TRUE,
+                              na.strings="#N/A",
+                              sep = ",")            
+    # Figures of Merit calculated using protein abundance.
+        #Please note that the column names were changed after skyline export to run in an older version of a script by Lilian Heil, but the values in this .csv file were derived using the protein abundance metric exported from the Skyline document grid reather than peptide total area fragment.
+        MM_prot_FOM <- read.csv("input\\MMCC_EV_Eclipse_figuresofmerit_proteins_NoNorm.csv",
+                              header = TRUE,
+                              na.strings="#N/A",
+                              sep = ",") %>%
+                    rename("Protein.Accession" = "peptide",
+                           "ProteinGroup" = "Protein")
+    # Metadata for MMCC
+        MM_meta <- read.csv("input\\MMCC_EV_Eclipse_files_meta.csv", 
+                              header = TRUE,
+                              na.strings="#N/A",
+                              sep = ",")     
+        
+# Freeze-thaw data
+    # Normalized area
+        FT_peptides <- read.csv("input\\FT_TICnormalized_LongForm_Peptide_NormArea_Long.csv",
+                              header = TRUE,
+                              na.strings="#N/A",
+                              sep = ",")    
+    # Freeze-thaw metadata
+        FT_meta <- read.csv("input\\FT_LongForm_Reps_Meta.csv", 
+                              header = TRUE,
+                              na.strings="#N/A",
+                              sep = ",")    
+
+```
+
+<br/><br/>
+
+
+## Protein targets
+
+Proteins that are commonly found in different types of EVs and a subset of the most abundant plasma proteins that are highlighted in subsequent figures.
+
+```{r Plotting_targets}
+
+#Table to see full protein list of interest.
+knitr::kable(organizer, caption = "Proteins of interest to be plotted", booktabs = TRUE, linesep = "", align = 'l', col.names = gsub("[.]", " ", names(organizer))) %>%
+  kable_styling(latex_options = "scale_down", font_size = 12) %>%
+  scroll_box(width = "950px", height = "350px")
+
+
+```
+
+
+<br/><br/>
+
+
+# Enrichment & depletion {.tabset .tabset-fade}
+
+Characterization of Mag-Net enrichment of circulating membrane particles. Total plasma isolated with the anticoagulant EDTA were collected, aliquoted, and frozen at -80&deg;C until processing. The plasma was processed in triplicate with the following conditions:
+
+* Total plasma from 1 $\mu$L of plasma- Hydroxyl (HYD) ReSyn magnetic beads
+
+* Enriched EVs isolated with Mag-Net from 100 $\mu$L of plasma- Strong anion exchange (SAX) ReSyn Mag-Netic beads
+
+<br/><br/>
+
+## Calculations
+
+Values obtained from Skyline's group comparison function at the protein-level using sum of transition areas (MS level = 2). The fold-changes, 95% Confidence intervals, and adjusted p-values were used as follows:
+
+* Adjusted p-values transformed to Log~10~ values for volcano plot.
+
+* Fold changes were transformed to Log~2~(fold change) values for volcano plot and barplots.
+
+* The 95% Confidence intervals (Labeled as FC~max~ and FC~min~) were used to calculate standard error and standard deviation (SD) of the FC, and then the SD after Log~2~ transformation for Log~2~(fold change) plots.
+
+$~$
+
+Converting 95% CI to standard error:
+
+  $$SE_{FC} = \frac{FC_{max} - FC_{min}}{\ 3.92}$$
+
+Converting standard error to standard deviation:
+
+  $$SD_{FC} = \frac{SE_{FC}}{\sqrt{\frac{1}{n_{EV}}+\frac{1}{n_{Plasma}}}}$$
+  
+Taking into account Log2 transformation on standard deviation:
+
+  $$SD_{Log_{2}FC} = \frac{1}{ln(2)}*\frac{SD_{FC}}{FC}$$
+
+
+$~$
+
+```{r GC_FC_input_cleanup, message=FALSE}
+
+# Remove MS Level and Fold Change Result column
+Simplified_FC <- subset(AllGroups_FC, select = -c(MS.Level, Fold.Change.Result) ) 
+    # # If you left in NAs due to Skyline settings that have been changed, you need to remove all rows associated with "NaN".
+    # # Comment out the above line and use the next 3 lines instead:
+        # AllGroups_FC_noNaN <- AllGroups_FC[- grep("NaN", AllGroups_FC$Fold.Change),]
+        #     # Remove MS Level and Fold Change Result column
+        #     Simplified_FC <- subset(AllGroups_FC_noNaN, select = -c(MS.Level, Fold.Change.Result) )
+
+# Numeric data including sample number for both groups and the number of standard error widths around the mean for a 95% confidence interval (A constant)
+sample_n_SAX <- 3
+sample_n_HYD <- 3
+CI_SEwidth <- (2*1.96)
+
+# Rename columns to simplify later steps, and use pipes add new columns with new values for plotting and later use.
+Simplified_FC <- Simplified_FC %>%
+  rename("Gene" = "Protein.Gene",
+         "Group.Accessions" = "Protein.Accession",
+         "Group.Proteins" = "Protein",
+         "FC" = "Fold.Change",
+         "FCmin" = "Min.Fold.Change",
+         "FCmax" = "Max.Fold.Change",
+         "Adj_pValue" = "Adjusted.P.Value",
+         "Log2FC" = "Log.2.Fold.Change") %>%
+  mutate(Protein.Accession = Group.Accessions, # Duplicating group accession (Containing all accessions) to be split in next section
+         Log10pValue = log(Adj_pValue, 10), # Log 10 transform of adjusted p-value
+         Log2FCmin = log(FCmin, 2), # Log 2 transform of minimum fold change
+         Log2FCmax = log(FCmax, 2), # Log 2 transform of maximum fold change
+         FC_SE = ((FCmax-FCmin)/CI_SEwidth), # Converting 95% CI to standard error
+         FC_SD_NoProp = (FC_SE / (sqrt(1/sample_n_SAX)+(1/sample_n_HYD))), # Converting standard error to standard deviation
+         FC_SD_Log2 = ((1/log(2))*(FC_SD_NoProp/(FC)))) # Taking into account Log2 transformation on back-calculated standard deviation
+
+# Simplifying the dataframe by selecting specific columns
+Simplified_FC <-  Simplified_FC[, c("Protein.Accession", "Group.Proteins", "Group.Accessions", "Gene", "FC", "FCmin", "FCmax", "Adj_pValue", "Log2FC", "Log10pValue", "Log2FCmin", "Log2FCmax", "FC_SE", "FC_SD_NoProp", "FC_SD_Log2")]
+
+# Table displying full dataset with modifications
+knitr::kable(Simplified_FC, caption = "Simplified data with shortened column names", booktabs = TRUE, linesep = "", align = 'l', col.names = gsub("[.]", " ", names(Simplified_FC))) %>%
+        kable_styling(latex_options = "scale_down", font_size = 12) %>%
+        scroll_box(width = "950px", height = "450px") 
+
+```
+
+$~$
+
+## Categorization
+
+$~$
+
+Annotated each protein group in a new column labeled "type" based on the fold change and adjusted p-value. The thresholds for each annotation are described here:
+
+* **Enriched protein groups: ** 
+
+  + Fold change > 2
+  
+  + Adjusted p-value < 0.05
+
+
+* **Depleted protein groups: ** 
+
+  + Fold change < 0.5
+  
+  + Adjusted p-value < 0.05
+  
+The protein list including categorization as enriched, depleted, or not significant is printed as .csv file output.  
+
+
+```{r GC_FC_categorization}
+
+# Generate new column for categories
+Simplified_FC$type <- "Not Significant"
+Simplified_FC$type[Simplified_FC$FC < 0.5 & Simplified_FC$Adj_pValue<0.05] <- "Depleted"
+Simplified_FC$type[Simplified_FC$FC > 2 & Simplified_FC$Adj_pValue<0.05] <- "Enriched"
+
+# Generating total number of each category of either enriched, depleted, or not significant
+enriched <- sum(str_count(Simplified_FC$type, "Enriched"))
+depleted <- sum(str_count(Simplified_FC$type, "Depleted"))
+not_significant <- sum(str_count(Simplified_FC$type, "Not Significant"))
+proteingroup_total <- sum(enriched,depleted,not_significant)
+
+# Export the protein groups, FCs, minimum/maximum FCs, adjusted p-values (p< 0.05) and identifiers as a text file
+write.csv(Simplified_FC, paste(basename,enrichdeplet,"FCtype.csv", sep=""), quote=FALSE, row.names=FALSE)
+
+# summarizing proteins found and how many were significantly enriched or depleted.
+protein_summary <- c(paste(proteingroup_total," total"), paste(enriched," enriched"), paste(depleted," depleted"), paste(not_significant," not significant"))
+
+# Generate table.
+knitr::kable(protein_summary,
+              col.names = 'Proteins groups identified') 
+
+```
+
+$~$
+
+## Percentage lists
+
+$~$
+
+Beginning with the proteins that were categorized in the previous section, calculated the percent enrichment or depletion using the fold change of (EV protein abundance / total plasma protein abundance).
+
+Defined the following formulas as functions in base R, and applied to fold change, minimum fold change, and maximum fold change:
+
+* **Enriched protein groups: ** (1 - (fold change)) *100
+
+* **Depleted protein groups: ** (fold change) *100
+
+The enriched and depleted protein lists, respectively, are printed as two separate output files in '.csv' format.
+  
+```{r GC_FC_enrich_deplet}
+
+# Defining functions of percent enrichment or depletion to apply to fold change, minimum fold change, and maximum fold change. In formulas, x = fold change of (EV / total plasma).
+DepletionPercentConversion <- function(x) ((1-x)*100)
+EnrichmentPercentConversion <- function(x) (x*100)
+
+# Subset data frame into two separate data frames (protein lists) based on the fold change and adjusted p-values.
+    # Proteins depleted during the barplot preparation
+    depletion <- subset(Simplified_FC, Simplified_FC$FC < 0.5 & Simplified_FC$Adj_pValue < 0.05)
+    # Proteins enriched during the barplot preparation
+    enrichment <- subset(Simplified_FC, Simplified_FC$FC > 2 & Simplified_FC$Adj_pValue < 0.05)
+
+    
+   # All groups
+        percent_depletion <- depletion %>%
+          mutate(percent.depleted = DepletionPercentConversion(.$FC),
+                 percent.depleted.min95CI = DepletionPercentConversion(.$FCmin),
+                 percent.depleted.max95CI = DepletionPercentConversion(.$FCmax),
+                 percent.depleted.SD = DepletionPercentConversion(.$FC_SD_NoProp)) %>%
+          .[order(.$Adj_pValue, decreasing = FALSE),] 
+        
+        percent_enrichment <- enrichment %>%
+          mutate(percent.enriched = EnrichmentPercentConversion(.$FC),
+                 percent.enriched.min95CI = EnrichmentPercentConversion(.$FCmin),
+                 percent.enriched.max95CI = EnrichmentPercentConversion(.$FCmax),
+                 percent.enriched.SD = EnrichmentPercentConversion(.$FC_SD_NoProp)) %>%
+          .[order(.$Adj_pValue, decreasing = FALSE),] 
+
+# Export the depleted proteins only (FC < 0.5 and p <0.5) including protein groups, FCs, minimum/maximum FCs, adjusted p-values, identifiers, and percents as a text file
+write.csv(percent_depletion, paste(basename,enrichdeplet,"depleted_percents.csv", sep=""), quote=FALSE, row.names=FALSE)
+
+# Export the enriched proteins only (FC >2 and p <0.5)) including protein groups, FCs, minimum/maximum FCs, adjusted p-values, identifiers, and percents as a text file
+write.csv(percent_enrichment, paste(basename,enrichdeplet,"enriched_percents.csv", sep=""), quote=FALSE, row.names=FALSE)
+
+```
+
+$~$
+
+## Figure 2C
+
+$~$
+
+Each point represents a protein group where the -Log~10~(adjusted p-value) is plotted on the y-axis, and the Log~2~(fold change) is plotted on the x-axis.
+
+```{r volcano, warning=FALSE, message=FALSE}
+# Generate new data frame called "Simplified_FC_VC" from the "Simplified_FC" data frame that includes all data to keep older file.
+Simplified_FC_VC <- Simplified_FC
+
+# Assign protein accessions as factors.
+Simplified_FC_VC$Protein.Accession <- factor(Simplified_FC_VC$Protein.Accession)
+
+# Set aesthetic components of volcano plot to be generated in next section.
+    # Setting legend text
+        legendval <- "Protein Type"
+        
+    # Setting y- and x-axes
+        yaxval <- expression("-Log"[10]~"(adjusted p-value)")
+        xaxval <- expression("Log"[2]~"(fold change)")
+
+    # Setting p-value cutoff marking in figure (And setting to log 10 scale)
+        yaxFilter <- log(0.05, 10)
+    
+    # Setting depletion and enrichment value cutoff markings in figure (And setting to log 2 scale)
+        xaxFilterDeplet <- log(0.5, 2)
+        xaxFilterEnrich <- log(2, 2)
+
+
+# Code for a ggplot2 object.
+volcanoplot <- ggplot(data=Simplified_FC_VC, aes(x=Log2FC, y=-Log10pValue, col=type, label=Protein.Accession)) + 
+  # Set size and transparency of points.
+  geom_point(shape=19, alpha = 1, size = 0.2) + 
+  # Setting x-axis limits
+  scale_x_continuous(limits = c(-13.75,24.6), expand = c(0, 0)) +
+  # Set minimal theme
+  theme_classic()+
+  # Remove major and minor grid lines, alter text and legend formatting.
+  theme(plot.margin=grid::unit(c(0,0,0,0), "in"),
+        axis.line.x.bottom = element_line(linewidth=0.75),
+        axis.line.y.left = element_line(linewidth=0.75),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        axis.title=element_text(size=10,face="bold"),
+        axis.text.x = element_text(size=10, color = "black"),
+        axis.text.y = element_text(size=10, color = "black"),
+        legend.position="none")+
+  # Add horizontal line representing significance cut-off of y = -Log10(0.05)
+  geom_hline(yintercept=-yaxFilter, linetype="dashed", color = "azure4", linewidth=0.7) +
+  # Add vertical lines representing depletion fold change cut-off of x = Log2(0.5), and enrichment fold change cut-off of x = Log2(2)
+  geom_vline(xintercept=xaxFilterDeplet, linetype="dashed", color = "azure4", linewidth=0.7) +
+  geom_vline(xintercept=xaxFilterEnrich, linetype="dashed", color = "azure4", linewidth=0.7) +
+  # Add y-axis label and x-axis label
+  ylab(yaxval) +
+  xlab(xaxval) +
+
+  # Manually set color scale by category
+  scale_color_manual(values=c("Enriched"="blue", "Depleted"="red2", "Not Significant"="grey40"))
+
+# Export plot as svg
+ggsave(file = paste(basename,enrichdeplet,"Figure2C.svg", sep = ""), plot=volcanoplot, width=3.1, height=2.07)
+
+```
+
+
+
+```{r volcano_large_print, fig.dim = c(11.9806,8), warning=FALSE, message=FALSE}
+# This chunk of code exists only to print the unlabeled volcano plot in a larger size easier to see in the R Markdown file.
+
+# Note the alterations to font sizes, line width, and point sizes.
+
+# Code for a ggplot2 object.
+volcanoplot_visualized <- ggplot(data=Simplified_FC_VC, aes(x=Log2FC, y=-Log10pValue, col=type, label=Protein.Accession)) + 
+  # Set size and transparency of points.
+  geom_point(shape=19, alpha = 1, size = 2) +
+
+  # Add horizontal line representing significance cut-off of y = -Log10(0.05)
+  geom_hline(yintercept=-yaxFilter, linetype="dashed", color = "azure4", linewidth=1.5) +
+  # Add vertical lines representing depletion fold change cut-off of x = Log2(0.5), and enrichment fold change cut-off of x = Log2(2)
+  geom_vline(xintercept=xaxFilterDeplet, linetype="dashed", color = "azure4", linewidth=1.5) +
+  geom_vline(xintercept=xaxFilterEnrich, linetype="dashed", color = "azure4", linewidth=1.5) +
+
+  # Set x-axis limits and spacing
+  scale_x_continuous(limits = c(-13.5,24.5), expand = c(0, 0)) +
+
+  # Set minimal theme
+  theme_classic()+
+  # Remove major and minor grid lines, alter text and legend formatting.
+  theme(axis.line.x.bottom = element_line(linewidth=2),
+        axis.line.y.left = element_line(linewidth=2),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        axis.title=element_text(size=24,face="bold"),
+        axis.text.x = element_text(size=24, color = "black"),
+        axis.text.y = element_text(size=24, color = "black"),
+        legend.position="none")+
+
+  # Add y-axis label and x-axis label
+  ylab(yaxval) +
+  xlab(xaxval) +
+  # Add rectangle annotation
+    # annotate("rect", xmin = xaxFilterEnrich, xmax = 24.5, ymin = -yaxFilter, ymax = 7, color="navy", alpha=0) +
+  # Manually set color scale by category
+  scale_color_manual(values=c("Enriched"="blue", "Depleted"="red2", "Not Significant"="grey40"))
+
+
+# Printing plot for Markdown
+volcanoplot_visualized
+
+```
+
+
+$~$
+
+## Accession Matching
+
+Split rows by accession number in order to easily match with organizer table to label the volcano plot in Supplementary Figure 1 and to generate the barplots in Figure 3A and 3B.
+
+**NOTE:** This approach to matching accession numbers between the data and organizer table was used because none of the specific proteins of interest which are plotted in the subsequent volcano plots and barplots in the enrichment/depletion panels were assigned to multiple protein groups. If the person running this code changes the input in organizer to different proteins, which may have multiple accessions, this may break and/or provide inaccurate results.
+
+```{r}
+#Combine dataframe of protein abundances with specific proteins of interest that will be highlighted later in barplots and volcano plot.
+Simplified_FC_splitGroups <- Simplified_FC %>%
+                      separate_rows(., Protein.Accession, sep = " / ", convert = FALSE)
+
+```
+
+
+## Supplementary Figure S1
+  
+$~$
+
+Each point represents a protein group where the -Log~10~(adjusted p-value) is plotted on the y-axis, and the Log~2~(fold change) is plotted on the x-axis.
+
+```{r volcano_labeled, warning=FALSE, message=FALSE}
+# Dropping list to only EV markers and abundant plasma proteins
+organizer_short <- filter(organizer, Category == "marker" | Category == "plasma_abundant")
+
+# Generate new data frame called "Simplified_FC_VC" from the "Simplified_FC" data frame that includes all data to keep older file.
+Simplified_FC_VC_lab <- Simplified_FC_splitGroups %>%
+                        full_join(., organizer_short, by= "Protein.Accession") %>%
+                        .[!is.na(.$Log2FC),] %>%
+                        mutate(label = .$Protein)
+
+# Assign protein accessions as factors.
+Simplified_FC_VC_lab$Protein.Accession <- factor(Simplified_FC_VC_lab$Protein.Accession)
+
+ratio <- 3.1/2.07
+newwidth<- 8*ratio
+
+# Set aesthetic components of volcano plot to be generated in next section.
+    # Setting legend text
+        legendval <- "Protein Type"
+        
+    # Setting y- and x-axes
+        yaxval <- expression("-Log"[10]~"(adjusted p-value)")
+        xaxval <- expression("Log"[2]~"(fold change)")
+
+    # Setting p-value cutoff marking in figure (And setting to log 10 scale)
+        yaxFilter <- log(0.05, 10)
+    
+    # Setting depletion and enrichment value cutoff markings in figure (And setting to log 2 scale)
+        xaxFilterDeplet <- log(0.5, 2)
+        xaxFilterEnrich <- log(2, 2)
+
+
+# Code for a ggplot2 object.
+volcanoplotlabeled <- ggplot(data=Simplified_FC, aes(x=Log2FC, y=-Log10pValue, col=type, label=Protein.Accession)) + 
+  # Set size and transparency of points.
+  geom_point(shape=19, alpha = 1, size = 2) +
+
+  # Add horizontal line representing significance cut-off of y = -Log10(0.05)
+  geom_hline(yintercept=-yaxFilter, linetype="dashed", color = "azure4", linewidth=1.5) +
+  # Add vertical lines representing depletion fold change cut-off of x = Log2(0.5), and enrichment fold change cut-off of x = Log2(2)
+  geom_vline(xintercept=xaxFilterDeplet, linetype="dashed", color = "azure4", linewidth=1.5) +
+  geom_vline(xintercept=xaxFilterEnrich, linetype="dashed", color = "azure4", linewidth=1.5) +
+  
+  # Add labels for protein found in the barplots
+  geom_label_repel(data = Simplified_FC_VC_lab,
+                  aes(label = label), 
+                  force_pull   = 0.5,
+                  max.overlaps = Inf,
+                  box.padding = 1,
+                  color = "black",
+                  show.legend = FALSE) + 
+  
+  #Add point to clearly label proteins of interest.
+  geom_point(data = (Simplified_FC_VC_lab %>%
+                    filter(., Category == "marker" | Category == "plasma_abundant")),
+                    aes(x=Log2FC, y=-Log10pValue, fill=type), 
+                    shape=21, alpha = 1, size = 2, color = "black") + 
+  
+  # Set x-axis limits and spacing
+  scale_x_continuous(limits = c(-13.5,24.5), expand = c(0, 0)) +
+
+  # Set minimal theme
+  theme_classic()+
+  # Remove major and minor grid lines, alter text and legend formatting.
+  theme(axis.line.x.bottom = element_line(linewidth=2),
+        axis.line.y.left = element_line(linewidth=2),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        axis.title=element_text(size=24,face="bold"),
+        axis.text.x = element_text(size=24, color = "black"),
+        axis.text.y = element_text(size=24, color = "black"),
+        legend.position="none")+
+
+  # Add y-axis label and x-axis label
+  ylab(yaxval) +
+  xlab(xaxval) +
+  
+  # Manually set color scale using significance
+  scale_color_manual(values=c("Enriched"="blue", "Depleted"="red2", "Not Significant"="grey40"))
+
+
+# Export plot as svg
+ggsave(file = paste(basename,enrichdeplet,"Supplementary_Figure_S1.svg", sep = ""), plot=volcanoplotlabeled, width=newwidth, height=8)
+
+```
+
+```{r volcano_labeled_print, fig.dim = c(11.9806,8), warning=FALSE, message=FALSE}
+# Printing plot for Markdown
+volcanoplotlabeled
+```
+
+
+$~$
+
+## Barplot Setup
+
+$~$
+
+```{r GC_FC_barplot_organizing}
+# Merging the foldchange data with the "organizer" file to plot proteins of interest.
+  Simplified_FC_graph <- merge(organizer, Simplified_FC_splitGroups,  by="Protein.Accession")
+  Simplified_FC_graph$Protein.Accession <- factor(Simplified_FC_graph$Protein.Accession)
+  
+  #Generate entries in the dataframe for spacers between exosome, microvesicle, and apoptotic body/cell debris on x-axis.
+        spacer_setup <- Simplified_FC_graph[-c(1:40), ]
+        spacer1_vals = data.frame(Protein.Accession = "Spacer1", Order = 9.5, Protein.name = "Spacer1", 
+                                    Protein = "", Category = "marker", Particle = "spacer", 
+                                    Group.Proteins = "", Group.Accessions = "", Gene = "Spacer1", 
+                                    Log2FC = 0, FC_SD_Log2 = 0, type="Not Significant")
+        spacer2_vals = data.frame(Protein.Accession = "Spacer2", Order = 12.5, Protein.name = "Spacer2", 
+                                      Protein = " ", Category = "marker", Particle = "spacer", 
+                                      Group.Proteins = "", Group.Accessions = "", Gene = "Spacer2", 
+                                      Log2FC = 0, FC_SD_Log2 = 0, type="Not Significant")
+  # Merge spacers with main dataframe
+  spacer <- rbind(spacer_setup, spacer1_vals, spacer2_vals)
+  
+    colnames(Simplified_FC_graph)
+  
+  # Merge spacers with main dataframe
+    FC_graph_spaced <- Simplified_FC_graph %>%
+                       select(Protein.Accession, Order, Protein.name, Protein, Category, Particle, 
+                              Group.Proteins, Group.Accessions, Gene, Log2FC, FC_SD_Log2, type) %>%
+                       rbind(., spacer)
+  
+# Setting the y-axis for the next two code chunks.
+  yaxval_edbar <- expression("Log"[2]~"(EV fraction / Total plasma)")
+
+  
+```
+
+$~$
+
+## Figure 3A
+
+$~$
+
+```{r bar_marker, fig.dim = c(8,5), warning=FALSE, message=FALSE, echo=FALSE}
+
+barplot_marker_GC_FC_marker  <- (ggplot(data=filter(FC_graph_spaced, Category == "marker"), aes(x=reorder(Protein,Order), y=Log2FC, fill=type)) +
+    geom_col(color="black", position=position_dodge2(width = 0.8, reverse = FALSE))+
+  # Line range to show error
+    geom_linerange(aes(x=reorder(Protein,Order), ymin=(Log2FC-FC_SD_Log2), ymax=(Log2FC+FC_SD_Log2)),
+                position=position_dodge(0.9))+
+  theme_minimal()+
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(color="azure4"),
+        panel.grid.minor.y = element_line(color="azure3"),
+        axis.title=element_text(size=18,face="bold"),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size=18, color = "black"),
+        axis.text.y = element_text(size=18, color = "black"),
+        legend.position="none",
+        legend.title=element_blank(),
+        legend.text=element_blank(),
+        axis.title.x = element_blank())+
+  geom_hline(yintercept=0, linetype="solid", color = "black", linewidth=2) +
+  ylab(yaxval_edbar) +
+  scale_fill_manual(values=c(Enriched="blue", Depleted="red2", "Not Significant"="grey40"))
+    )
+
+# Export plot as svg
+ggsave(file = paste(basename,enrichdeplet,"Figure_3A.svg", sep=""), plot=barplot_marker_GC_FC_marker, width=8, height=5)
+
+```
+
+```{r bar_marker_print, fig.dim = c(8,5), warning=FALSE, message=FALSE, echo=FALSE}
+# Printing plot for Markdown
+barplot_marker_GC_FC_marker
+
+```
+
+$~$
+
+## Figure 3B
+
+$~$
+
+```{r bar_plasma, warning=FALSE, message=FALSE, echo=FALSE}
+
+barplot_plasma_GC_FC  <- (ggplot(data=filter(Simplified_FC_graph, Category == "plasma_abundant"), aes(x=reorder(Protein,Order), y=Log2FC, fill=type)) +
+  geom_col(color="black", position=position_dodge2(width = 0.8, reverse = FALSE))+
+  # Line range to show error
+    geom_linerange(aes(x=reorder(Protein,Order), ymin=(Log2FC-FC_SD_Log2), ymax=(Log2FC+FC_SD_Log2)),
+                position=position_dodge(0.9))+
+  theme_minimal()+
+  # ggtitle(expression("GC Log"[2]~"FC + SD")) +
+          # ('GC Log2FC + 95% CI')+
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(color="azure4"),
+        panel.grid.minor.y = element_line(color="azure3"),
+        axis.title=element_text(size=18,face="bold"),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size=18, color = "black"),
+        axis.text.y = element_text(size=18, color = "black"),
+        legend.position="none",
+        legend.title=element_blank(),
+        legend.text=element_blank(),
+        axis.title.x = element_blank())+
+  geom_hline(yintercept=0, linetype="solid", color = "black", linewidth=2) +
+  ylab(yaxval_edbar) +
+  # scale_fill_manual(values= c("#737373","#737373","#737373", "#737373"))
+  scale_fill_manual(values=c(Enriched="blue", Depleted="red2", "Not Significant"="grey40"))
+  
+)
+
+# Export plot as svg
+ggsave(file = paste(basename,enrichdeplet,"Figure_3B.svg", sep=""), plot=barplot_plasma_GC_FC, width=8, height=5)
+
+```
+
+```{r bar_plasma_print, fig.dim = c(8,5), warning=FALSE, message=FALSE, echo=FALSE}
+# Printing plot for Markdown
+barplot_plasma_GC_FC
+
+```
+
+
+
+<br/><br/>
+
+
+# MMCC {.tabset .tabset-fade}
+
+## Processing
+
+Box/Half violin plot of the ratio of each freeze thaw condition (1, 2, 4, and 8 cycles) as a ratio relative to 1 freeze-thaw cycle (FTC). Used the normalized area (MS level = 2, normalized to Total Ion Current).
+        MM_BHV_yaxval <- expression("Log"[2]~"(A/A"[100]~")")
+
+  $${Log_{2}\frac{A\%}{A_{100\%}}} = {Log_{2}\frac{Total\;Area\;Fragment_{(A\%)}}{Total\;Area\;Fragment_{(A_{100\%})}}}$$
+  
+
+```{r mm_pep_cleanup}
+MM_pepmeta <- full_join(MM_peptides, MM_meta, by = c("File.Name","Analyte.Concentration"))
+
+MM_pepmeta$Analyte.Concentration <- factor(MM_pepmeta$Analyte.Concentration, levels=c(0.0, 0.1, 0.3, 0.5, 0.7, 1.0, 3.0, 5.0, 7.0, 10.0, 30.0, 50.0, 70.0, 100))
+levels(MM_pepmeta$Analyte.Concentration)
+
+MM_pep_reps <- MM_pepmeta %>%
+                      rename("ProteinGroup" = "Protein.Name",
+                             "TAF" = "Total.Area.Fragment") %>%
+                      group_by(ProteinGroup, Peptide.Sequence, Batch.Name) %>%
+                      mutate(RatioToHum = TAF/TAF[Analyte.Concentration == '100'],
+                             Log2Ratio = log(RatioToHum, 2))
+
+MM_pep_reps$type <- "dilution"
+MM_pep_reps$type[MM_pep_reps$Analyte.Concentration == 100] <- "human"
+
+write.csv(MM_pep_reps, paste(basename,matrixinfo,"peptide_replicates.csv", sep=""), quote=FALSE, row.names=FALSE)
+
+
+MM_pep_summ <- MM_pep_reps %>%
+                      group_by(ProteinGroup, Peptide.Sequence, Analyte.Concentration) %>%
+                      summarize(.,
+                      mean_TAF = mean(TAF),
+                      mean_Ratio = mean(RatioToHum),
+                      mean_L2R = mean(Log2Ratio),
+                      sd_L2R = sd(Log2Ratio),
+                      CV_L2R = ((sd_L2R/mean_L2R)*100))
+
+
+write.csv(MM_pep_summ, paste(basename,matrixinfo,"peptide_Avg_Summary.csv", sep=""), quote=FALSE, row.names=FALSE)
+
+
+```
+
+$~$
+
+```{r mm_prot_cleanup}
+MM_protmeta <- full_join(MM_proteins, MM_meta, by = c("File.Name","Analyte.Concentration"))
+
+MM_protmeta$Analyte.Concentration <- factor(MM_protmeta$Analyte.Concentration, levels=c(0.0, 0.1, 0.3, 0.5, 0.7, 1.0, 3.0, 5.0, 7.0, 10.0, 30.0, 50.0, 70.0, 100))
+levels(MM_protmeta$Analyte.Concentration)
+
+colnames(MM_protmeta)
+
+MM_prot_reps <- MM_protmeta %>%
+                      rename("ProteinGroup" = "Protein.Name") %>%
+                      # rename("ProteinGroup" = "Protein",
+                      #        "Protein.Abundance" = "Total.Area.Fragment",
+                      #        "Protein.Accession" = "Peptide.Sequence") %>%
+
+                      group_by(ProteinGroup, Batch.Name) %>%
+                      mutate(RatioToHum = Protein.Abundance/Protein.Abundance[Analyte.Concentration == '100'],
+                             Log2Ratio = log(RatioToHum, 2))
+
+MM_prot_reps$type <- "dilution"
+MM_prot_reps$type[MM_prot_reps$Analyte.Concentration == 100] <- "human"
+
+write.csv(MM_prot_reps, paste(basename,matrixinfo,"protein_replicates.csv", sep=""), quote=FALSE, row.names=FALSE)
+
+
+MM_prot_summ <- MM_prot_reps %>%
+                      group_by(ProteinGroup, Analyte.Concentration) %>%
+                      summarize(.,
+                      mean_ProtAb = mean(Protein.Abundance),
+                      mean_Ratio = mean(RatioToHum),
+                      mean_L2R = mean(Log2Ratio),
+                      sd_L2R = sd(Log2Ratio),
+                      CV_L2R = ((sd_L2R/mean_L2R)*100))
+
+write.csv(MM_prot_summ, paste(basename,matrixinfo,"protein_Avg_Summary.csv", sep=""), quote=FALSE, row.names=FALSE)
+
+
+```
+
+$~$
+
+## Figure 5B
+
+Box/half violin (counts) of all peptides identified in the matrix matched calibration curve. Figure 5B only plots 1%, 5%, 10%, 30%, and 70% for improved visualization, but note that additional concentrations were used to calculate the figures of merit and are available to review.
+
+$~$
+
+```{r mm_violhalf_box_settings}
+# Set aesthetic components of Box/half-violin plot to be generated in next section.
+    # Setting y- and x-axes labels
+        MM_BHV_yaxval <- expression("Log"[2]~"(A/A"[100]~")")
+        MM_BHV_xaxval <- expression("% Human")
+    # Box/violin plot Color Palette
+        PaletteBoxviol <- c("#08306B", "#08306B", "#08306B", "#08306B", "#08306B", "#08306B")
+
+    # Threshold for 0 point and edge of annotation
+        MM_pt0 <- 0.72
+        MM_bxviL <- 1.0
+
+```
+
+
+
+```{r mm_pep_violhalf_MM_BHV_annotline, warning=FALSE, message=FALSE}
+
+# Filtering data
+     MM_pep_boxviol_plot <- MM_pep_summ %>%
+        filter(., Analyte.Concentration == 70 | Analyte.Concentration == 50 | Analyte.Concentration == 30 | Analyte.Concentration == 10 | Analyte.Concentration == 5 | Analyte.Concentration == 1) %>%
+        .[!is.infinite(.$mean_L2R),] %>%
+        .[- grep("NaN", .$mean_L2R),]
+    pep_BH <- "All"
+
+
+# Code for a ggplot2 object.
+plot_pep_boxviol <- ggplot(data=MM_pep_boxviol_plot, aes(x = Analyte.Concentration, y = mean_L2R, fill = Analyte.Concentration, col = Analyte.Concentration)) +
+
+  # Segments marking theoretical ratio
+    geom_segment(aes(x = (0), xend = (MM_pt0+0.75), y = log((1/100), 2), yend = log((1/100), 2)), linetype = 2, colour = PaletteBoxviol[1]) +
+    geom_segment(aes(x = (0), xend = (MM_pt0+1+MM_bxviL), y = log((5/100), 2), yend = log((5/100), 2)), linetype = 2, colour = PaletteBoxviol[2]) +
+    geom_segment(aes(x = (0), xend = (MM_pt0+2+MM_bxviL), y = log((10/100), 2), yend = log((10/100), 2)), linetype = 2, colour = PaletteBoxviol[3]) +
+    geom_segment(aes(x = (0), xend = (MM_pt0+3+MM_bxviL), y = log((30/100), 2), yend = log((30/100), 2)), linetype = 2, colour = PaletteBoxviol[4]) +
+    geom_segment(aes(x = (0), xend = (MM_pt0+4+MM_bxviL), y = log((50/100), 2), yend = log((50/100), 2)), linetype = 2, colour = PaletteBoxviol[5]) +
+    geom_segment(aes(x = (0), xend = (MM_pt0+5+MM_bxviL), y = log((70/100), 2), yend = log((70/100), 2)), linetype = 2, colour = PaletteBoxviol[6]) +
+
+  # Half violin plot using "counts"
+    geom_flat_violin(data=MM_pep_boxviol_plot, scale = "count", width=1, trim = TRUE, alpha = 0.2, position = position_nudge(x = .2)) +
+  
+  # Box plot
+  geom_boxplot(width=0.3, outlier.shape = NA, alpha = 1, notch=FALSE, lwd=0.3, fill = NA) +
+ 
+  # y-axis limits
+  ylim(-10,2) +
+  
+  # Adding padding to x-axis
+  scale_x_discrete(expand = c(0.1, 0)) +
+
+  # Set theme
+  theme_classic()+
+  
+  # Remove major and minor grid lines, alter text and legend formatting.
+  theme(plot.title = element_text(size=12),
+          axis.line.x.bottom = element_line(linewidth=0.75),
+          axis.line.y.left = element_line(linewidth=0.75),
+          panel.grid.major.x = element_blank(),
+          panel.grid.major.y = element_blank(),
+          panel.grid.minor.x = element_blank(),
+          panel.grid.minor.y = element_blank(),
+          axis.title=element_text(size=10,face="bold"),
+          axis.text.x = element_text(size=10, color = "black"),
+          axis.text.y = element_text(size=10, color = "black"),
+          legend.position="none")+
+
+  # Add y-axis label and x-axis label
+    ylab(MM_BHV_yaxval) +
+    xlab(MM_BHV_xaxval) +
+  
+  # Color scales for boxes and half violins.
+  scale_colour_manual(values=PaletteBoxviol) +
+  scale_fill_manual(values=PaletteBoxviol)
+
+# Saving plot as an .svg format.
+ggsave(file = paste(basename,matrixinfo,"Pep",pep_BH,"Figure_5B.svg", sep = ""), plot=plot_pep_boxviol, width=5, height=3.75)
+
+# Printing plot for Markdown
+plot_pep_boxviol
+
+```
+
+
+$~$
+
+```{r MMCC_target_sharedformats}
+# SEtting shared axes for specific protein plots of MMCC data
+indiv_yaxval <-  expression("Protein Abundance")
+indiv_xaxval <- expression("% Human")  
+
+```
+
+
+
+$~$
+
+## Suppmentary Figure S5 (CD9)
+
+```{r MMCC_target_CD9}
+
+# Defining values for _ figures of merit.
+  cd9_slope <- MM_prot_FOM[MM_prot_FOM$Protein.Accession == "P21926", "slope_linear"]
+  cd9_intercept <- MM_prot_FOM[MM_prot_FOM$Protein.Accession == "P21926", "intercept_linear"]
+  cd9_LOD <- MM_prot_FOM[MM_prot_FOM$Protein.Accession == "P21926", "LOD"]
+  cd9_LOQ <- MM_prot_FOM[MM_prot_FOM$Protein.Accession == "P21926", "LOQ"]
+
+# Defining values for _ figures of merit.
+  annot <- MM_prot_reps %>%
+              filter(Protein.Accession == "P21926")
+  annotmax <- as.numeric(max(annot$Protein.Abundance))
+
+# ggplot of individual protein abundances and figures of merit for _.
+  MM_plot_prot_cd9 <- ggplot(data=MM_prot_FOM, aes(x=as.numeric(as.character(Analyte.Concentration)), y=mean_ProtAb, col=Protein.Accession)) +
+  
+    geom_hline(yintercept=0, linetype="solid", color = "black", linewidth=0.75) + # Plotting x-axis line separately as formatting preference
+  # Plotting slope of line from figures of merit for matched matrix
+  geom_abline(slope = MM_prot_FOM[MM_prot_FOM$Protein.Accession == "P21926", "slope_linear"], intercept = MM_prot_FOM[MM_prot_FOM$Protein.Accession == "P21926", "intercept_linear"], linetype="dotted", linewidth=0.5) +
+    
+  # Plotting the limit of detection from figures of merit file.
+  annotate("segment",
+           x = MM_prot_FOM[MM_prot_FOM$Protein.Accession == "P21926", "LOD"],
+           xend = MM_prot_FOM[MM_prot_FOM$Protein.Accession == "P21926", "LOD"],
+           y = 0, yend = annotmax, linetype="dashed", colour = "grey40", linewidth=0.5, alpha=0.9) +
+  
+  # Plotting the limit of quantitation from figures of merit file.  
+  annotate("segment",
+           x = MM_prot_FOM[MM_prot_FOM$Protein.Accession == "P21926", "LOQ"],
+           xend = MM_prot_FOM[MM_prot_FOM$Protein.Accession == "P21926", "LOQ"],
+           y = 0, yend = annotmax, linetype="dashed", colour = "blue", linewidth=0.5, alpha=0.9) +
+  
+  # Plotting individual protein abundance values from the three replicate injections.
+  geom_point(data = filter(MM_prot_reps, Protein.Accession == "P21926"), aes(x=as.numeric(as.character(Analyte.Concentration)), y=Protein.Abundance, group=Protein.Accession), shape=21, alpha = 0.8, size = 2, fill="blue", color="black") + 
+
+  # Setting axes scales and formatting
+  scale_x_continuous() +
+  scale_y_continuous(breaks=c(0,0.5e07, 1.0e07, 1.5e07, 2.0e07), labels = scientific) +
+
+  # Set minimal theme
+      theme_minimal()+
+  # Remove major and minor grid lines, alter text and legend formatting.
+      theme(axis.line.y.left = element_line(linewidth=0.75, color = "black"),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        axis.title=element_text(size=10,face="bold"),
+        axis.text.x = element_text(size=10, color = "black"),
+        axis.text.y = element_text(size=10, color = "black"),
+        legend.position="none")+
+
+  # Add y-axis label and x-axis label
+  ylab(indiv_yaxval) +
+  xlab(indiv_xaxval)
+
+# Saving CD9 plot as an .svg format.  
+ggsave(file = paste(basename,matrixinfo,"Supplementary_Figure_S5_","protein_CD9_","P21926.svg", sep = ""), plot=MM_plot_prot_cd9, width=5, height=3.5)
+
+# Printing summary of CD9 figures of merit
+print(paste0("Protein: ","CD9"," (P21926)"," | LOD: ",cd9_LOD," | LOQ: ",cd9_LOQ," | slope: ",cd9_slope," | intercept: ",cd9_intercept))
+
+```
+
+```{r MMCC_target_CD9_print, fig.dim = c(5,3.5), warning=FALSE, message=FALSE}
+# Printing plot for Markdown
+MM_plot_prot_cd9
+
+```
+
+
+$~$
+
+## Suppmentary Figure S5 (NCAM1)
+
+```{r MMCC_target_NCAM1, warning=FALSE, message=FALSE}
+
+# Defining values for NCAM1 figures of merit.
+  ncam1_slope <- MM_prot_FOM[MM_prot_FOM$Protein.Accession == "P13591", "slope_linear"]
+  ncam1_intercept <- MM_prot_FOM[MM_prot_FOM$Protein.Accession == "P13591", "intercept_linear"]
+  ncam1_LOD <- MM_prot_FOM[MM_prot_FOM$Protein.Accession == "P13591", "LOD"]
+  ncam1_LOQ <- MM_prot_FOM[MM_prot_FOM$Protein.Accession == "P13591", "LOQ"]
+
+# Defining values for NCAM1 figures of merit.
+  annot <- MM_prot_reps %>%
+              filter(Protein.Accession == "P13591")
+  annotmax <- as.numeric(max(annot$Protein.Abundance))
+
+# ggplot of individual protein abundances and figures of merit for NCAM1.
+  MM_plot_prot_ncam1 <- ggplot(data=MM_prot_FOM, aes(x=as.numeric(as.character(Analyte.Concentration)), y=mean_ProtAb, col=Protein.Accession)) +
+  
+    geom_hline(yintercept=0, linetype="solid", color = "black", linewidth=0.75) + # Plotting x-axis line separately as formatting preference
+  # Plotting slope of line from figures of merit for matched matrix
+  geom_abline(slope = MM_prot_FOM[MM_prot_FOM$Protein.Accession == "P13591", "slope_linear"], intercept = MM_prot_FOM[MM_prot_FOM$Protein.Accession == "P13591", "intercept_linear"], linetype="dotted", linewidth=0.5) +
+    
+  # Plotting the limit of detection from figures of merit file.
+  annotate("segment",
+           x = MM_prot_FOM[MM_prot_FOM$Protein.Accession == "P13591", "LOD"],
+           xend = MM_prot_FOM[MM_prot_FOM$Protein.Accession == "P13591", "LOD"],
+           y = 0, yend = annotmax, linetype="dashed", colour = "grey40", linewidth=0.5, alpha=0.9) +
+  
+  # Plotting the limit of quantitation from figures of merit file.  
+  annotate("segment",
+           x = MM_prot_FOM[MM_prot_FOM$Protein.Accession == "P13591", "LOQ"],
+           xend = MM_prot_FOM[MM_prot_FOM$Protein.Accession == "P13591", "LOQ"],
+           y = 0, yend = annotmax, linetype="dashed", colour = "blue", linewidth=0.5, alpha=0.9) +
+  
+  # Plotting individual protein abundance values from the three replicate injections.
+  geom_point(data = filter(MM_prot_reps, Protein.Accession == "P13591"), aes(x=as.numeric(as.character(Analyte.Concentration)), y=Protein.Abundance, group=Protein.Accession), shape=21, alpha = 0.8, size = 2, fill="blue", color="black") + 
+
+  # Setting axes scales and formatting
+  scale_x_continuous() +
+  scale_y_continuous(breaks=c(0,1.5e06, 3.5e06, 5.5e06, 7.5e06), labels = scientific) +
+
+  # Set minimal theme
+      theme_minimal()+
+  # Remove major and minor grid lines, alter text and legend formatting.
+      theme(axis.line.y.left = element_line(linewidth=0.75, color = "black"),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        axis.title=element_text(size=10,face="bold"),
+        axis.text.x = element_text(size=10, color = "black"),
+        axis.text.y = element_text(size=10, color = "black"),
+        legend.position="none")+
+
+  # Add y-axis label and x-axis label
+  ylab(indiv_yaxval) +
+  xlab(indiv_xaxval)
+
+
+# Saving NCAM1 plot as an .svg format.  
+ggsave(file = paste(basename,matrixinfo,"Supplementary_Figure_S5_","protein_NCAM1_","P13591.svg", sep = ""), plot=MM_plot_prot_ncam1, width=5, height=3.5)
+
+# Printing summary of NCAM1 figures of merit
+print(paste0("Protein: ","NCAM1"," (P13591)"," | LOD: ",ncam1_LOD," | LOQ: ",ncam1_LOQ," | slope: ",ncam1_slope," | intercept: ",ncam1_intercept))
+
+```
+
+
+```{r MMCC_target_NCAM1_print, fig.dim = c(5,3.5), warning=FALSE, message=FALSE}
+# Printing plot for Markdown
+MM_plot_prot_ncam1
+
+```
+
+
+$~$
+
+## Suppmentary Figure S5 (APOB)
+
+
+```{r MMCC_target_APOB}
+
+# Defining values for APOB figures of merit.
+  apob_slope <- MM_prot_FOM[MM_prot_FOM$Protein.Accession == "P04114", "slope_linear"]
+  apob_intercept <- MM_prot_FOM[MM_prot_FOM$Protein.Accession == "P04114", "intercept_linear"]
+  apob_LOD <- MM_prot_FOM[MM_prot_FOM$Protein.Accession == "P04114", "LOD"]
+  apob_LOQ <- MM_prot_FOM[MM_prot_FOM$Protein.Accession == "P04114", "LOQ"]
+
+# Defining values for APOB figures of merit.
+  annot <- MM_prot_reps %>%
+              filter(Protein.Accession == "P04114")
+  annotmax <- as.numeric(max(annot$Protein.Abundance))
+
+# ggplot of individual protein abundances and figures of merit for APOB.
+  MM_plot_prot_apob <- ggplot(data=MM_prot_FOM, aes(x=as.numeric(as.character(Analyte.Concentration)), y=mean_ProtAb, col=Protein.Accession)) +
+  
+    geom_hline(yintercept=0, linetype="solid", color = "black", linewidth=0.75) + # Plotting x-axis line separately as formatting preference
+  # Plotting slope of line from figures of merit for matched matrix
+  geom_abline(slope = MM_prot_FOM[MM_prot_FOM$Protein.Accession == "P04114", "slope_linear"], intercept = MM_prot_FOM[MM_prot_FOM$Protein.Accession == "P04114", "intercept_linear"], linetype="dotted", linewidth=0.5) +
+    
+  # Plotting the limit of detection from figures of merit file.
+  annotate("segment",
+           x = MM_prot_FOM[MM_prot_FOM$Protein.Accession == "P04114", "LOD"],
+           xend = MM_prot_FOM[MM_prot_FOM$Protein.Accession == "P04114", "LOD"],
+           y = 0, yend = annotmax, linetype="dashed", colour = "grey40", linewidth=0.5, alpha=0.9) +
+  
+  # Plotting the limit of quantitation from figures of merit file.  
+  annotate("segment",
+           x = MM_prot_FOM[MM_prot_FOM$Protein.Accession == "P04114", "LOQ"],
+           xend = MM_prot_FOM[MM_prot_FOM$Protein.Accession == "P04114", "LOQ"],
+           y = 0, yend = annotmax, linetype="dashed", colour = "red2", linewidth=0.5, alpha=0.9) +
+  
+  # Plotting individual protein abundance values from the three replicate injections.
+  geom_point(data = filter(MM_prot_reps, Protein.Accession == "P04114"), aes(x=as.numeric(as.character(Analyte.Concentration)), y=Protein.Abundance, group=Protein.Accession), shape=21, alpha = 0.8, size = 2, fill="red2", color="black") + 
+
+  # Setting axes scales and formatting
+  scale_x_continuous() +
+  scale_y_continuous(breaks=c(0,1e06, 2.5e06, 4.0e06, 6.0e06), labels = scientific) +
+
+  # Set minimal theme
+      theme_minimal()+
+  # Remove major and minor grid lines, alter text and legend formatting.
+      theme(axis.line.y.left = element_line(linewidth=0.75, color = "black"),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        axis.title=element_text(size=10,face="bold"),
+        axis.text.x = element_text(size=10, color = "black"),
+        axis.text.y = element_text(size=10, color = "black"),
+        legend.position="none")+
+
+  # Add y-axis label and x-axis label
+  ylab(indiv_yaxval) +
+  xlab(indiv_xaxval)
+  
+# Saving SPOB plot as an .svg format.  
+ggsave(file = paste(basename,matrixinfo,"Supplementary_Figure_S5_","protein_APOB_","P04114.svg", sep = ""), plot=MM_plot_prot_apob, width=5, height=3.5)
+
+# Printing summary of APOB figures of merit
+print(paste0("Protein: ","APOB"," (P04114)"," | LOD: ",apob_LOD," | LOQ: ",apob_LOQ," | slope: ",apob_slope," | intercept: ",apob_intercept))
+
+```
+
+
+```{r MMCC_target_APOB_print, fig.dim = c(5,3.5), warning=FALSE, message=FALSE}
+# Printing plot for Markdown
+MM_plot_prot_apob
+
+```
+
+<br/><br/>
+
+
+# Freeze-Thaw  {.tabset .tabset-fade}
+
+$~$
+
+## Set-up
+
+Box/Half violin plot of the ratio of each freeze thaw condition (1, 2, 4, and 8 cycles) as a ratio relative to 1 freeze-thaw cycle (FTC). Used the normalized area (MS level = 2, normalized to Total Ion Current).
+
+
+
+
+```{r ft_pep_cleanup}
+FT_pepmeta <- FT_peptides %>%
+              full_join(., FT_meta, by = c("File.Name")) %>%
+              filter(., SampleGroup != "Total Plasma")
+
+FT_pepmeta$SampleGroup <- factor(FT_pepmeta$SampleGroup, levels=c("Freeze Thaw EV 1", "Freeze Thaw EV 2", "Freeze Thaw EV 4", "Freeze Thaw EV 8"))
+levels(FT_pepmeta$SampleGroup) <- list("1" = "Freeze Thaw EV 1",
+                                       "2" = "Freeze Thaw EV 2", 
+                                       "4" = "Freeze Thaw EV 4", 
+                                       "8" = "Freeze Thaw EV 8")
+
+FT_pep_partial <- FT_pepmeta %>%
+                      rename("ProteinGroup" = "Protein.Name",
+                             "NormArea" = "Normalized.Area") %>%
+                      group_by(ProteinGroup, Peptide.Sequence, SampleGroup) %>%
+                      mutate(NormArea_calc = mean(NormArea))
+
+FT_pep_reps <- FT_pep_partial  %>%
+                      group_by(ProteinGroup, Peptide.Sequence) %>%
+                      mutate(RatioTo1FT = NormArea_calc/NormArea_calc[SampleGroup == 1],
+                             percent = RatioTo1FT*100) %>%
+                        filter(., NormArea > 0) %>%
+                      .[!is.infinite(.$RatioTo1FT),]# Removing 15 peptides with infinite ratios
+
+FT_pep_reps$type <- "freeze_thaws"
+FT_pep_reps$type[FT_pep_reps$SampleGroup == '1FT'] <- "baseline"
+
+write.csv(FT_pep_reps, paste(basename,freezeinfo,"ratios_replicates.csv", sep=""), quote=FALSE, row.names=FALSE)
+
+# Summarizing mean, median, SD of  the ratio to 1 FT cycle, and of that percent
+FT_pep_summary_byFT <- FT_pep_reps %>%
+                      filter(., SampleGroup != "1") %>%
+                      group_by(SampleGroup) %>%
+                      summarize(.,
+                      mean_RatioTo1FT = mean(RatioTo1FT),
+                      mean_percent = mean(percent),
+                      median_RatioTo1FT = median(RatioTo1FT),
+                      median_percent = median(percent),
+                      sd_RatioTo1FT = sd(RatioTo1FT),
+                      sd_percent = sd(percent))
+
+write.csv(FT_pep_summary_byFT, paste(basename,freezeinfo,"Ratios_summary_ByFTcycle.csv", sep=""), quote=FALSE, row.names=FALSE)
+
+```
+
+$~$
+
+```{r FT_violhalf_FT_BHV_settings}
+# Set aesthetic components of volcano plot to be generated in next section.
+
+    # Setting y- and x-axes
+        FT_BHV_yaxval <- expression("Relative Peptide Intensity (%)")
+        FT_BHV_xaxval <- expression("Number of freeze-thaw cycles")
+    # Color Palettes
+        # PaletteCB <- c("#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#000000")
+    # Rcolor brewer "Blues" palette    
+          # brewer.pal(n=9,"Blues")
+          FT_PaletteBoxviol <- c("#08519C", "#08519C", "#08519C", "#08519C")
+
+```
+
+## Supplementary Figure S6
+
+Examining the Log~2~ratio of each freeze-thaw cycle relative to 1 freeze-thaw cycle:
+
+  $${y\;axis} = {Log_{2}\frac{Normalized\;peptide\;area_{(X\;FTC)}}{Average\;Normalized\;peptide\;area_{(1FTC)}}}$$
+
+$~$
+
+```{r FT_BHV_plot, warning=FALSE, message=FALSE, echo=FALSE}
+
+# Code for a ggplot2 object.
+      plot_FT_pep_boxviol <- ggplot(data=filter(FT_pep_reps, SampleGroup != "1"), aes(x = SampleGroup, y = percent, fill = SampleGroup, col = SampleGroup)) +
+    
+      # Flat/Half violin plot
+      geom_flat_violin(data=filter(FT_pep_reps, SampleGroup != "1"), scale = "count", width=1, trim = TRUE, alpha = 0.2, position = position_nudge(x = .2)) +
+      
+      # Box plot
+      geom_boxplot(width=0.3, outlier.shape = NA, alpha = 1, notch=FALSE, lwd=0.3, fill = NA) +
+     
+      geom_hline(yintercept=100, linetype="dotted", color = "grey40", linewidth=0.75) +
+
+      # Axis limits if needed 
+      ylim(0,250) +
+    
+      # Adding padding to x-axis
+      scale_x_discrete(expand = c(0.1, 0)) +
+    
+      # Set minimal theme
+        theme_classic()+
+      # Remove major and minor grid lines, alter text and legend formatting.
+        theme(plot.title = element_text(size=12),
+              axis.line.x.bottom = element_line(linewidth=0.75),
+              axis.line.y.left = element_line(linewidth=0.75),
+              panel.grid.major.x = element_blank(),
+              panel.grid.major.y = element_blank(),
+              panel.grid.minor.x = element_blank(),
+              panel.grid.minor.y = element_blank(),
+              axis.title=element_text(size=10,face="bold"),
+              axis.text.x = element_text(size=10, color = "black"),
+              axis.text.y = element_text(size=10, color = "black"),
+              legend.position="none")+
+    
+      # Add y-axis label and x-axis label
+        ylab(FT_BHV_yaxval) +
+        xlab(FT_BHV_xaxval) +
+    
+      scale_colour_manual(values=FT_PaletteBoxviol) +
+      scale_fill_manual(values=FT_PaletteBoxviol)
+
+# Saving plot as an .svg format. 
+ggsave(file = paste(basename,freezeinfo,"BHV_AllPeptides_Supplementary_Figure_S6.svg", sep = ""), plot=plot_FT_pep_boxviol, width=5, height=3.75)
+
+
+```
+
+
+
+```{r FT_BHV_plot_print, fig.dim = c(5,3.75), warning=FALSE, message=FALSE}
+# Printing plot for Markdown
+plot_FT_pep_boxviol
+```
+
+
+
