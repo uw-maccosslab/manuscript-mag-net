@@ -1,47 +1,91 @@
-Order,Protein name,Protein,Alternate name,Protein Accession,Category,Particle,Lipo,Depletion column
-1,CD9 antigen,CD9,CD9 antigen,P21926,marker,exo,,
-2,CD63 antigen,CD63,CD63 antigen,P08962,marker,exo,,
-3,CD81 antigen,CD81,CD81 antigen,P60033,marker,exo,,
-4,Programmed cell death 6-interacting protein,PDCD6IP,ALIX,Q8WUM4,marker,exo,,
-5,Flotillin 1,FLOT1,Flotillin 1,O75955,marker,exo,,
-6,Flotillin 2,FLOT2,Flotillin 2,Q14254,marker,exo,,
-7,Tumor susceptibility gene 101 protein,TSG101,TS101,Q99816,marker,exo,,
-8,Syntenin-1,SDCBP,SDCBP,O00560,marker,exo,,
-9,Neural cell adhesion molecule 1,NCAM1,CD56,P13591,marker,exo,,
-10,Tumor necrosis factor receptor superfamily member 5,CD40,TNR5,P25942,marker,microves,,
-11,Septin-2,SEPTIN2,,Q15019,marker,microves,,
-12,"ATP synthase subunit alpha, mitochondrial",ATP5F1A,ATPA,P25705,marker,microves,,
-13,Endoplasmin,HSP90B1,"GRP94, ENPL",P14625,marker,apop_debris,,
-14,Annexin A5,ANXA5,Annexin V,P08758,marker,apop_debris,,
-15,Calreticulin,CALR,,P27797,membrane,,,
-16,Calnexin,CALX,,P27824,membrane,,,
-17,Cadherin-1,CDH1,ECad,P12830,membrane,,,
-18,Ras-related protein Rab-4A,RAB4A,,P20338,membrane,,,
-19,Ras-related protein Rab-5A,RAB5A,,P20339,membrane,,,
-20,Clathrin light chain A,CLTA,,P09496,membrane,,,
-21,Clathrin light chain B,CLTB,,P09497,membrane,,,
-22,Integrin alpha-2,ITGA2,,P17301,membrane,,,
-23,Vesicle-associated membrane protein 7,VAMP7,,P51809,membrane,,,
-24,Amyloid-beta precursor protein (A4),APP,A4,P05067,platelet_neuro,,,
-25,Clusterin,CLU,ApoJ,P10909,platelet_neuro,,,
-26,Leucine-rich repeat serine/threonine-protein kinase 2,LRRK2,,Q5S007,platelet_neuro,,,
-27,Alpha-synuclein,SNCA,,P37840,platelet_neuro,,,
-28,Beta-synuclein,SNCB,,Q16143,platelet_neuro,,,
-29,Neurofilament heavy polypeptide,NEFH,,P12036,platelet_neuro,,,
-30,Parkinson disease protein 7,PARK7,DJ1,Q99497,platelet_neuro,,,
-31,TAR DNA-binding protein 43,TARDBP,,Q13148,platelet_neuro,,,
-32,Glial Fibrillary acidic protein,GFAP,,P14136,platelet_neuro,,,
-33,Presenillin-1,PSEN1,,P49768,platelet_neuro,,,
-34,Albumin,ALB,,P02768,plasma_abundant,,,Agilent & Thermo
-35,Serotransferrin,TF,,P02787,plasma_abundant,,,Agilent & Thermo
-36,Alpha-2-macroglobulin,A2M,,P01023,plasma_abundant,,,Agilent & Thermo
-37,Alpha-1-antitrypsin,SERPINA1,,P01009,plasma_abundant,,,Agilent & Thermo
-38,Alpha-1-acid glycoprotein 1,ORM1,,P02763,plasma_abundant,,,Agilent & Thermo
-39,Haptoglobin,HP,,P00738,plasma_abundant,,,Agilent & Thermo
-40,Apolipoprotein A1,APOA1,,P02647,plasma_abundant,,"HDL, CM",Agilent & Thermo
-41,Apolipoprotein A2,APOA2,,P02652,plasma_abundant,,"HDL, CM",Agilent
-42,Apolipoprotein B,APOB,APOB100,P04114,plasma_abundant,,LDL,
-43,Apolipoprotein C1,APOC1,,P02654,plasma_abundant,,"HDL, VLDL, CM",
-44,Apolipoprotein D,APOD,,P05090,plasma_abundant,,HDL,
-45,Hemoglobin alpha,HBA1,,P69905,plasma_abundant,,,
-46,Hemoglobin beta,HBB,,P68871,plasma_abundant,,,
+Order,Protein name,Protein,Alternate name,Figure Label,Protein Accession,Category,Particle,Lipo,Depletion column,AD_PD
+1,CD9 antigen,CD9,CD9 antigen,CD9,P21926,marker,exo,,,
+2,CD63 antigen,CD63,CD63 antigen,CD63,P08962,marker,exo,,,
+3,CD81 antigen,CD81,CD81 antigen,CD81,P60033,marker,exo,,,
+4,Programmed cell death 6-interacting protein,PDCD6IP,ALIX,PDCD6IP,Q8WUM4,marker,exo,,,
+5,Flotillin 1,FLOT1,Flotillin 1,FLOT1,O75955,marker,exo,,,
+6,Flotillin 2,FLOT2,Flotillin 2,FLOT2,Q14254,marker,exo,,,
+7,Tumor susceptibility gene 101 protein,TSG101,TS101,TSG101,Q99816,marker,exo,,,
+8,Syntenin-1,SDCBP,SDCBP,SDCBP,O00560,marker,exo,,,
+9,Neural cell adhesion molecule 1,NCAM1,CD56,NCAM1,P13591,marker,exo,,,
+10,Tumor necrosis factor receptor superfamily member 5,CD40,TNR5,CD40,P25942,marker,microves,,,
+11,Septin-2,SEPTIN2,,SEPTIN2,Q15019,marker,microves,,,
+12,"ATP synthase subunit alpha, mitochondrial",ATP5F1A,ATPA,ATP5F1A,P25705,marker,microves,,,
+13,Endoplasmin,HSP90B1,"GRP94, ENPL",HSP90B1,P14625,marker,apop_debris,,,
+14,Annexin A5,ANXA5,Annexin V,ANXA5,P08758,marker,apop_debris,,,
+15,Calreticulin,CALR,,CALR,P27797,membrane,,,,
+16,Calnexin,CALX,,CANX,P27824,membrane,,,,
+17,Cadherin-1,CDH1,ECad,CDH1,P12830,membrane,,,,
+18,Ras-related protein Rab-4A,RAB4A,,RAB4A,P20338,membrane,,,,
+19,Ras-related protein Rab-5A,RAB5A,,RAB5A,P20339,membrane,,,,
+20,Clathrin light chain A,CLTA,,CLTA,P09496,membrane,,,,
+21,Clathrin light chain B,CLTB,,CLTB,P09497,membrane,,,,
+22,Integrin alpha-2,ITGA2,,ITGA2,P17301,membrane,,,,
+23,Vesicle-associated membrane protein 7,VAMP7,,VAMP7,P51809,membrane,,,,
+24,Amyloid-beta precursor protein (A4),APP,A4,APP,P05067,platelet_neuro,,,,
+25,Clusterin,CLU,ApoJ,CLU,P10909,platelet_neuro,,,,
+26,Leucine-rich repeat serine/threonine-protein kinase 2,LRRK2,,LRRK2,Q5S007,platelet_neuro,,,,
+27,Alpha-synuclein,SNCA,,SNCA,P37840,platelet_neuro,,,,
+28,Beta-synuclein,SNCB,,SNCB,Q16143,platelet_neuro,,,,
+29,Neurofilament heavy polypeptide,NEFH,,NEFH,P12036,platelet_neuro,,,,
+30,Parkinson disease protein 7,PARK7,DJ1,PARK7,Q99497,platelet_neuro,,,,
+31,TAR DNA-binding protein 43,TARDBP,,TARDBP,Q13148,platelet_neuro,,,,
+32,Glial Fibrillary acidic protein,GFAP,,GFAP,P14136,platelet_neuro,,,,
+33,Presenillin-1,PSEN1,,PSEN1,P49768,platelet_neuro,,,,
+34,Albumin,ALB,,ALB,P02768,plasma_abundant,,,Agilent & Thermo,
+35,Serotransferrin,TF,,TF,P02787,plasma_abundant,,,Agilent & Thermo,
+36,Alpha-2-macroglobulin,A2M,,A2M,P01023,plasma_abundant,,,Agilent & Thermo,
+37,Alpha-1-antitrypsin,SERPINA1,,SERPINA1,P01009,plasma_abundant,,,Agilent & Thermo,
+38,Alpha-1-acid glycoprotein 1,ORM1,,ORM1,P02763,plasma_abundant,,,Agilent & Thermo,
+39,Haptoglobin,HP,,HP,P00738,plasma_abundant,,,Agilent & Thermo,
+40,Apolipoprotein A1,APOA1,,APOA1,P02647,plasma_abundant,,"HDL, CM",Agilent & Thermo,
+41,Apolipoprotein A2,APOA2,,APOA2,P02652,plasma_abundant,,"HDL, CM",Agilent,
+42,Apolipoprotein B,APOB,APOB100,APOB,P04114,plasma_abundant,,LDL,,
+43,Apolipoprotein C1,APOC1,,APOC1,P02654,plasma_abundant,,"HDL, VLDL, CM",,
+44,Apolipoprotein D,APOD,,APOD,P05090,plasma_abundant,,HDL,,
+45,Hemoglobin alpha,HBA1,,HBA1/2,P69905,plasma_abundant,,,,
+46,Hemoglobin beta,HBB,,HBB,P68871,plasma_abundant,,,,
+47,Transitional endoplasmic reticulum ATPase,TERA,,VCP,P55072,ADPD,,,,Decreased
+48,Dual specificity mitogen-activated protein kinase kinase 2,MP2K2,,MAP2K2,P36507,ADPD,,,,Decreased
+49,Ubiquitin carboxyl-terminal hydrolase 15,UBP15,KIAA0529,USP15,Q9Y4E8,ADPD,,,,Decreased
+50,Bifunctional arginine demethylase and lysyl-hydroxylase JMJD6,JMJD6,,JMJD6,Q6NYC1,ADPD,,,,Decreased
+51,Platelet glycoprotein 4,CD36,,CD36,P16671,ADPD,,,,Decreased
+52,"Phosphatidylinositol 3,4,5-trisphosphate 5-phosphatase 2",SHIP2,INPPL1,INPPL1,O15357,ADPD,,,,Increased
+53,Intermembrane lipid transfer protein VPS13A,VP13A,,VPS13A,Q96RL7,ADPD,,,,Increased
+54,DnaJ homolog subfamily C member 10,DJC10,,DNAJC10,Q8IXB1,ADPD,,,,Increased
+55,Protein S100-B,S100B,,S100B,P04271,ADPD,,,,Increased
+56,Huntingtin,HD,,HTT,P42858,ADPD,,,,Increased
+57,Cadherin-2,CADH2,,CDH2,P19022,ADPD,,,,Increased
+58,Vacuolar protein sorting-associated protein 18 homolog,VPS18,KIAA1475,VPS18,Q9P253,ADPD,,,,Increased
+59,AP-2 complex subunit alpha-1,AP2A1,ADTAA,AP2A1,O95782,ADPD,,,,Increased
+60,Exocyst complex component 5,EXOC5,SEC10,EXOC5,O00471,ADPD,,,,Increased
+61,Syntaxin-17,STX17,,STX17,P56962,ADPD,,,,Increased
+62,Unconventional myosin-Va,MYO5A,MYH12,MYO5A,Q9Y4I1,ADPD,,,,Increased
+63,C-terminal-binding protein 1,CTBP1,CTBP,CTBP1,Q13363,ADPD,,,,Increased
+64,AP-5 complex subunit sigma-1,AP5S1,C20orf29,AP5S1,Q9NUS5,ADPD,,,,Increased
+65,Protein MON2 homolog,MON2,SF21,MON2,Q7Z3U7,ADPD,,,,Increased
+66,Kalirin,KALRN,,KALRN,O60229,ADPD,,,,Increased
+67,SNARE-associated protein Snapin,SNAPN,BLOC1S7,SNAPIN,O95295,ADPD,,,,Increased
+68,AP-1 complex subunit gamma-1,AP1G1,ADTG,AP1G1,O43747,ADPD,,,,Increased
+69,26S proteasome non-ATPase regulatory subunit 3,PSMD3,,PSMD3,O43242,ADPD,,,,Decreased
+70,26S proteasome regulatory subunit 10B,PRS10,SUG2,PSMC6,P62333,ADPD,,,,Decreased
+71,Ubiquitin-like-conjugating enzyme ATG3,ATG3,,ATG3,Q9NT62,ADPD,,,,Decreased
+72,26S proteasome regulatory subunit 6B,PRS6B,,PSMC4,P43686,ADPD,,,,Decreased
+73,Ubiquitin carboxyl-terminal hydrolase 4,UBP4,UNPH,USP4,Q13107,ADPD,,,,Decreased
+74,Ubiquitin-fold modifier-conjugating enzyme 1,UFC1,,UFC1,Q9Y3C8,ADPD,,,,Decreased
+75,26S proteasome non-ATPase regulatory subunit 7,PSMD7,MOV34L,PSMD7,P51665,ADPD,,,,Decreased
+76,Ubiquitin thioesterase OTUB1,OTUB1,OTB1,OTUB1,Q96FW1,ADPD,,,,Decreased
+77,Polyubiquitin-B,UBB,,UBB,P0CG47,ADPD,,,,Decreased
+78,E3 ubiquitin-protein ligase RBX1,RBX1,ROC1,RBX1,P62877,ADPD,,,,Decreased
+79,26S proteasome regulatory subunit 4,PRS4,,PSMC1,P62191,ADPD,,,,Decreased
+80,Dolichyl-diphosphooligosaccharide--protein glycosyltransferase subunit STT3B,STT3B,SIMP,STT3B,Q8TCJ2,ADPD,,,,Decreased
+81,Ubiquitin-conjugating enzyme E2 H,UBE2H,,UBE2H,P62256,ADPD,,,,Decreased
+82,26S proteasome regulatory subunit 8,PRS8,SUG1,PSMC5,P62195,ADPD,,,,Decreased
+83,(E3-independent) E2 ubiquitin-conjugating enzyme,UBE2O,KIAA1734,UBE2O,Q9C0C9,ADPD,,,,Decreased
+84,5'-AMP-activated protein kinase subunit gamma-1,AAKG1,,PRKAG1,P54619,ADPD,,,,Increased
+85,Peptidyl-glycine alpha-amidating monooxygenase,AMD,,PAM,P19021,ADPD,,,,Increased
+86,Very low-density lipoprotein receptor,VLDLR,,VLDLR,P98155,ADPD,,,,Increased
+87,"Isovaleryl-CoA dehydrogenase, mitochondrial",IVD,,IVD,P26440,ADPD,,,,Increased
+88,Ectonucleotide pyrophosphatase/phosphodiesterase family member 7,ENPP7,,ENPP7,Q6UWV6,ADPD,,,,Increased
+89,Lysophospholipid acyltransferase 5,MBOA5,MBOAT5,LPCAT3,Q6P1A2,ADPD,,,,Increased
+90,"Trifunctional enzyme subunit alpha, mitochondrial",ECHA,HADH,HADHA,P40939,ADPD,,,,Increased
