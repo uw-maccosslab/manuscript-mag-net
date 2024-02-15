@@ -36,6 +36,13 @@ Scripts are located in the **bin** folder.
    - Supplementary Figure S5
    - Supplementary Figure S6
 
+* **Fig_7C__SuppFigs_S7_S8_S9.Rmd:** R Markdown file that is used to generate the following figure panels:
+
+   - Figure 7C
+   - Supplementary Figure S7
+   - Supplementary Figure S8
+   - Supplementary Figure S9
+
 
 $~$
 
@@ -57,7 +64,7 @@ $~$
 
 #### ***Skyline Document:*** SAX-EV vs OH PAC-Plasma-EncV2score_2023-06-02_10-52-08.sky.zip
 
-* **Protein_List.csv:** Table used to extract and label of proteins of interest highlighted in Enrichment/Depletion plots (Figure 3A and 3B) and in the volcano plot annotated with specific extracellular vesicle markers and common plamsa proteins. (Supplementary Figure S1).
+* **Protein_List.csv:** Table used to extract and label of proteins of interest highlighted in Enrichment/Depletion plots (Figure 3A and 3B), in the volcano plot annotated with specific extracellular vesicle markers and common plamsa proteins. (Supplementary Figure S1), and AD/PD box plots (Figure 7C, Supplementary Figure S7-S9).
 
 * **group-fc-Beads-SAXN-Particles vs HydN-Plasma-EncV2score-QuantReport_2023-03-05_13-29-41.csv:** Skyline document grid output comparing SAX bead Mag-Net enriched fraction to Hydroxyl bead SP3-prepared total plasma samples. Used to generate the volcano plot with protein number annotations (Figure 2C), Enrichment/Depletion plots (Figure 3A and 3B), and in the volcano plot annotated with specific extracellular vesicle markers and common plamsa proteins. (Supplementary Figure S1).
 
@@ -79,6 +86,17 @@ $~$
   - **FT_TICnormalized_LongForm_Peptide_NormArea_Long.csv"** Skyline document grid output of peptide normalized area without normalization applied (Supplementary Figure S6). Located in the "Reports" folder under **Supplementary Files** on the [Mag-Net page of PanoramaWeb](https://panoramaweb.org/Mag-Net.url).
 
 * **FT_LongForm_Reps_Meta.csv:** Skyline document grid output of user-defined metadata for freeze-thaw experiment.
+
+
+#### ***Skyline Document:*** Particles-ADPD-Pilot-EncV2score-QuantReport_2023-03-05_17-26-00.sky.zip
+
+* **20230812-particlesADPD_pilot-batchadj-Prot.csv:** Normalized protein abundance generated in post-processing.
+
+* **mag-net_biomarker_rocs-final.csv:** ROC values generated in post-processing.
+
+* **TPAD HCN_ADD_PDD_PDCN Plasma - Metadata.csv:** Skyline document grid output of user-defined metadata for AD/PD experiment.
+
+* **Protein_List.csv:** Table used to extract and label of proteins of interest highlighted in Enrichment/Depletion plots (Figure 3A and 3B), in the volcano plot annotated with specific extracellular vesicle markers and common plamsa proteins. (Supplementary Figure S1), and AD/PD box plots (Figure 7C, Supplementary Figure S7-S9).
 
 
 $~$
