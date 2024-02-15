@@ -1,0 +1,997 @@
+---
+title: "Figure 7C, Supplementary Figure S7, S8, and S9"
+author: "Kristine A. Tsantilas, PhD"
+date: "02/14/2024"
+output: 
+  html_document:
+      code_folding: hide
+      toc: true
+      toc_float:
+        collapsed: false
+---
+
+# Overview
+
+R Markdown to generate box plots for Figure 7C and Supplementary Figures X, Y, and Z.
+
+Figures are intended to show specific protein changes between healthy controls and individuals with neurological degeneration including Parkinson's Disease (Cognitively Normal), Parkinson's Disease, Alzheimer's Disease. 
+
+Note that the 4 box plots generated here end with the shared file ID "_partial.svg" as a couple of manual changes were made to better align the labels for the x/y axes and the sample legends.
+ 
+<br/><br/>
+
+
+## Experiment
+
+* Biological differences between healthy controls and individuals with neurological degeneration: HCN, PDCN, PDD, ADD
+    
+  - **HCN:** Healthy controls
+  
+  - **PDCN:** Parkinson's Disease, Cognitively Normal
+ 
+  - **PDD:** Parkinson's Disease
+
+  - **ADD:** Alzheimer's Disease
+
+
+* A mixed population of EVs were enriched from plasma from healthy controls (HCN) and individuals with neurological degeneration: PDCN, PDD, or ADD using Mag-Net.
+
+
+<br/><br/>
+
+
+# Data Import and Formatting {.tabset .tabset-fade}
+
+## Input
+
+Normalized protein abundance data extracted from Skyline with post-processing, ROC data (post-processing), and metadata are needed to run this R markdown. 
+
+Note that the receiver operating characteristic (ROC) curves were generated using script titled "".
+
+* 20230812-particlesADPD_pilot-batchadj-Prot.csv
+  
+* mag-net_biomarker_rocs-final.csv
+
+* TPAD HCN_ADD_PDD_PDCN Plasma - Metadata.csv
+  
+* ADPD_Protein_List.csv
+
+
+<br/><br/>
+
+
+## Output
+
+This R Markdown produces 4 figures (as .svg files): 
+
+* **Figure 7C:** Panel of 10 individual protein box plots. The top row of 5 proteins were found to be increased in ADD, while the bottom row of 5 proteins decreased.
+
+* **Supplementary Figure 7:** Panel of 12 individual protein box plots. Proteins were found to be increased in ADD and involved in vesicle mediated transport
+
+* **Supplementary Figure 8:** Panel of 8 individual protein box plots. Proteins were found to proteins that were found to be increased in ADD and are involved in lipid metabolism.
+
+* **Supplementary Figure 9:** Panel of 16 individual protein box plots. Proteins were found to proteins that were found to be increased in ADD and are involved in Ubiquitin-proteasome mediated protein degradation.
+
+
+$~$
+
+Please note that the 4 box plots generated in this R Markdown generate files that end with the shared file ID "_partial.svg". A few manual changes were made in Inkscape, a vector graphics editor, to change the x and y coordinates of the axes labels and shared figure legends and remove empty space. The numeric values of those coordinate changes in Inkscape to generate the final figures in the manuscript are detailed in the subheader for each figure.
+ 
+
+<br/><br/>
+
+
+## Software Information
+
+* Skyline Daily (64-bit)
+
+* R version: 4.1.2
+
+* R Studio version: 2023.03.0+386 "Cherry Blossom" Release (3c53477afb13ab959aeb5b34df1f10c237b256c3, 2023-03-09) for Windows
+Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) RStudio/2023.03.0+386 Chrome/108.0.5359.179 Electron/22.0.3 Safari/537.36
+
+* Packages required: 
+
+  + dplyr (version 1.1.2)
+  
+  + stringr (version 1.5.0)
+  
+  + tidyr (version 1.3.0)
+  
+  + matrixStats (version 0.63.0)
+  
+  + ggplot2 (version 3.4.2)
+  
+  + ggrepel (version 0.9.3)
+  
+  + PupillometryR (version 0.0.4)
+  
+  + RColorBrewer (version 1.1-3)
+  
+  + knitr (version 1.43)
+  
+  + kableExtra (version 1.3.4)
+  
+  + scales (version 1.2.1)
+  
+  + patchwork (version 1.1.2)
+  
+  + cowplot (version 1.1.2)
+  
+  + ggpubr (version 0.6.0)
+  
+* Inkscape: 1.1 (c68e22c387, 2021-05-23)
+
+  
+<br/><br/>
+
+```{r package_installation, include=FALSE}
+
+# Download necessary packages for analysis
+library(dplyr)
+library(stringr)
+library(tidyr)
+library(matrixStats)
+library(ggplot2)
+library(ggrepel)
+library(PupillometryR)
+library(RColorBrewer)
+library(knitr)
+library(kableExtra)
+library(scales)
+library(patchwork)
+library(cowplot)
+library(ggpubr)
+
+# Check session info
+sessionInfo()
+
+```
+
+```{r setup, include=FALSE}
+# Setting global options for all code chunks
+knitr::opts_knit$set(echo = TRUE, collapse = TRUE, warning=FALSE, message=FALSE, root.dir = 'C:\\Users\\Kristine\\Desktop\\MagNet\\Mag-Net')
+
+# Set-up current date to include in filename output
+(today <- Sys.Date())
+basename <- today %>%
+            format(., "%Y%b%d") %>% # with month as a word
+            paste0(.,"_")
+
+# Set-up base filenames by dataset to classify filename output
+adpdinfo <- "ADPD_"
+
+```
+
+
+<br/><br/>
+
+
+## File Import
+
+Importing data and metadata files from AD/PD experiment. The input files include normalized protein abundance data, ROC curve data, and metadata.
+
+$~$
+
+```{r file_import}
+# Import organizer containing proteins of interest
+        organizer <- read.csv("input\\Protein_List.csv", 
+                              header = TRUE,
+                              na.strings="#N/A",
+                              sep = ",")
+
+# Data to generate box plots.
+        ADPD_proteins <- read.csv("input\\20230812-particlesADPD_pilot-batchadj-Prot.csv", 
+                              header = TRUE,
+                              na.strings="#N/A",
+                              sep = ",") 
+
+    # Metadata for AD/PD experiment
+        ADPD_meta <- read.csv("input\\TPAD HCN_ADD_PDD_PDCN Plasma - Metadata.csv", 
+                              header = TRUE,
+                              na.strings="#N/A",
+                              sep = ",")     
+
+    # ROC and significance values
+        ad_roc <- read.csv("input\\mag-net_biomarker_rocs-final.csv", 
+                              header = TRUE,
+                              na.strings="#N/A",
+                              sep = ",")     
+
+```
+
+
+<br/><br/>
+
+
+## Protein targets
+
+Proteins that are commonly found in different types of EVs and a subset of the most abundant plasma proteins that are highlighted in subsequent figures.
+
+$~$
+
+```{r adpd_protein_target}
+# Removing some columns to simplify output below and  larger dataframes later in the R Markdown since a lot of this information is not needed for the AD/PD panels.
+organizer_adpd <- organizer %>%
+                  select(-c(Order,Alternate.name,Particle,Lipo,Depletion.column))
+
+
+# Table to see full protein list of interest.
+knitr::kable((organizer_adpd %>%
+   filter(., Category == "ADPD")), caption = "Proteins of interest to be plotted", booktabs = TRUE, linesep = "", align = 'l', col.names = gsub("[.]", " ", names((organizer_adpd %>%
+                                    filter(., Category == "ADPD"))))) %>%
+  kable_styling(latex_options = "scale_down", font_size = 12) %>%
+  scroll_box(width = "950px", height = "350px")
+```
+
+
+<br/><br/>
+
+
+## Connecting protein measurements to metadata
+
+Cleaning-up data input files for clarity and later use.
+
+$~$
+
+```{r ADPD_input_cleanup}
+# Rename proteins columns
+  ADPD_proteins <- ADPD_proteins %>%
+                   rename("ProteinGroup" = "X") %>%
+                   mutate(ProteinEntry = ProteinGroup)
+
+# Renaming gene name column to match other dataframes
+   ad_roc <- ad_roc %>%
+                   rename("Gene.name" = "Gene.Name",
+                          "ProteinGroup" = "Protein.Name")      
+   
+```
+
+$~$
+
+Accession matching between protein abundance data, ROC data, and metadata.
+
+Split rows by accession number in order to easily match with organizer and metadata tables.
+
+**NOTE:** This approach to matching accession numbers between the data and metadata leads to rows for each member of a protein group shown in "ProteinEntry". They will be marked by a shared "ProteinGroup" ID. Proteins within a protein group will share the same data. 
+$~$
+
+```{r ADPD_input_splitrows_longinput, warning=FALSE, results='hide'}
+# Combine dataframe of protein abundances with specific proteins of interest that will be highlighted later in boxplots.
+  ADPD_proteins_splitGroups <- ADPD_proteins %>%
+                        separate_rows(., "ProteinEntry", sep = " / ", convert = FALSE)
+
+    # Reordering columns in ADPD_proteins_splitGroups dataframe to make manual review easier.
+      ADPD_proteins_splitGroups <- ADPD_proteins_splitGroups [, c(1, 42, 2:41)]
+
+
+# Generate long-format data
+  ADPD_proteins_splitGroups_L <- ADPD_proteins_splitGroups %>%
+                                 pivot_longer(
+                                 cols = starts_with("TPAD"),
+                                 names_to = "SampleID",
+                                 values_to = "Normalized_Protein",
+                                 values_drop_na = FALSE) %>%
+                                 separate_wider_delim(., ProteinEntry, delim = "|", names = c(NA, "Protein.Accession", "Name"), 
+                                                      too_few = "debug",  too_many = "debug")
+  colnames(ADPD_proteins_splitGroups_L)
+
+# Simplify dataframe to remove debug columns and verify successful split.
+  observations_adpd <- as.numeric(nrow(ADPD_proteins_splitGroups_L))
+  observations_adpd_true <- as.numeric(sum(str_detect(ADPD_proteins_splitGroups_L$ProteinEntry_ok, 'TRUE')))
+
+    if (observations_adpd == observations_adpd_true){
+       ADPD_proteins_splitGroups_L <- ADPD_proteins_splitGroups_L %>%
+                                      select(-c(ProteinEntry_ok,ProteinEntry_pieces,ProteinEntry_remainder))
+       print("Sucessfully split groups into rows. Check if proteins of interest are part of a group.")
+    } else {
+      print ("Row splitting NOT successful.")
+    }
+    colnames(ADPD_proteins_splitGroups_L)
+    
+```
+
+
+<br/><br/>
+
+
+Connecting protein measurements to metadata.
+
+$~$
+
+```{r ADPD_plot_input, results='hide'}
+# Generate new data frame called "ADPD_proteins_merged_L" from the "ADPD_proteins_splitGroups_L" data frame that includes normalized protein abundance data.
+  ADPD_proteins_merged_L <- ADPD_proteins_splitGroups_L %>%
+                            full_join(., organizer_adpd, by= "Protein.Accession", multiple = "all") %>%
+                            full_join(., ADPD_meta, by = "SampleID", multiple = "all")
+
+# To include z-scores
+  ADPD_proteins_merged_L <- ADPD_proteins_merged_L %>%
+                            group_by(ProteinGroup, Protein.Accession, Name, ProteinEntry) %>%
+                            mutate(mean_all = mean(Normalized_Protein),
+                                   sd_all = sd(Normalized_Protein),
+                                   zscore = scale(Normalized_Protein, center = TRUE, scale = TRUE))
+
+# Assign AD/PD groups as factors.
+  ADPD_proteins_merged_L$Condition <- factor(ADPD_proteins_merged_L$Condition, levels=c("HCN","PDCN","PDD","ADD"))
+  levels(ADPD_proteins_merged_L$Condition)
+
+# Merge the normalized protein abundance data and sample metadata with the ROC scores.
+  ADPD_proteins_roc_L <- ADPD_proteins_merged_L %>%
+                            full_join(., ad_roc, by= "ProteinGroup")
+
+# Rounding the ROC scores and q-values to make visualizing them in the box plots later easier.  
+  ADPD_proteins_roc_rounded_L <- ADPD_proteins_roc_L %>% 
+                                             mutate(AD.ROC_rounded = format(round(AD.ROC, digits = 2), nsmall = 2),
+                                                    AD.q.value_rounded = format(round(AD.q.value, digits = 2), nsmall = 2))
+
+```
+
+
+  
+<br/><br/>
+
+
+# Figure _ and Supplementary Figures _ {.tabset .tabset-fade}
+
+The boxplot figures summarize the following results:
+
+* **Biological group (HCN, PDCN, PDD, ADD):** Plotted on x-axis
+
+* **Normalized Log~2~(Protein abundance):** Plotted on y-axis
+
+* **AD ROC values:** Plotted for each individual protein within panel
+
+* **AD q values:** Plotted for each individual protein within panel
+
+
+## Boxplot Functions
+
+Defining functions to generate figures in this R Markdown:
+
+  1. **boxplot_yax_nox_noleg:** Generate box plots for individual proteins
+
+  2. **boxplot_leg_only:** Shared legends to be included in compiled figures
+
+$~$
+
+```{r function_boxplots}
+# Function to generate box plots for individual proteins.
+
+# No individual plot legends
+boxplot_yax_nox_noleg <- function(dataframe, selected_protein, label_spacer, figure_height, figure_width){
+    print(paste0("1/3: Define protein-specific graphing parameters for ",selected_protein))
+    # Remove comment here and below .svg and .png export code to export panels of individual proteins
+    # print(paste0("1/5: Define protein-specific graphing parameters for ",selected_protein))
+  colnames(ADPD_proteins_merged_L)  
+    # Setting up protein-specific parameters to make and annotate plots.
+         # y-axis maximum (Define plot edge)
+         ymax <- (max((dataframe %>%
+                              filter(., Category == "ADPD") %>%
+                              filter(., Figure.Label == selected_protein))$Normalized_Protein)+1)
+         # y-axis minimum (Define plot edge)
+         ymin <- (min((dataframe %>%
+                              filter(., Category == "ADPD") %>%
+                              filter(., Figure.Label == selected_protein))$Normalized_Protein)-0.25)
+         # Define y-axis position of bracket over the other 3 groups
+         ad_bracket_y <- (max((dataframe %>%
+                              filter(., Category == "ADPD") %>%
+                              filter(., Condition == "ADD") %>%
+                              filter(., Figure.Label == selected_protein))$Normalized_Protein)+0.2)
+         shared_bracket_y <- (max((dataframe %>%
+                              filter(., Category == "ADPD") %>%
+                              filter(., Condition != "ADD") %>%
+                              filter(., Figure.Label == selected_protein))$Normalized_Protein)+0.2)
+
+          connection_y <- max(ad_bracket_y, shared_bracket_y)+0.2
+  
+    print(paste0("2/3: Extract AD ROC and q-values for ",selected_protein))
+    # Remove comment here and below .svg and .png export code to export panels of individual proteins
+    # print(paste0("2/5: Extract AD ROC and q-values for ",selected_protein))
+         interim_table <- dataframe %>%
+                          filter(., Figure.Label == selected_protein)
+         roc <- unique(interim_table$AD.ROC_rounded)
+         q_value <- unique(interim_table$AD.q.value_rounded)
+      
+
+    print(paste0("3/3: Generating plot for ",selected_protein))
+    # Remove comment here and below .svg and .png export code to export panels of individual proteins
+    # print(paste0("3/5: Generating plot for ",selected_protein))
+        boxplot_protein <- (ggplot((dataframe %>%
+                                    filter(., Category == "ADPD") %>%
+                                    filter(., Figure.Label == selected_protein)), 
+                                    aes(x = Condition, y = Normalized_Protein, fill=Condition)) +
+    
+                        
+                        stat_boxplot(geom = "errorbar", width = 0.2) +
+                        geom_boxplot(fill="white", outlier.shape = NA) +
+                        geom_boxplot(alpha=0.7, color="black", outlier.shape = NA) +
+                        geom_point(aes(fill = Condition), colour='black', shape = 21, alpha=0.5, size=2, 
+                                   position = position_jitter(seed = 1, w = 0.1, h = 0)) +
+                          geom_bracket(data = (dataframe %>%
+                              filter(., Category == "ADPD") %>%
+                              filter(., Figure.Label == selected_protein)),
+                              xmin = "HCN", xmax = "PDD", 
+                              y.position = shared_bracket_y, size = 0.5, tip.length = 0.002,
+                              label = "") +
+                          geom_bracket(data = (dataframe %>%
+                              filter(., Category == "ADPD") %>%
+                              filter(., Figure.Label == selected_protein)),
+                              xmin = 3.75, xmax = 4.25, vjust = -0.4,
+                              y.position = ad_bracket_y, tip.length = 0.002,
+                              size = 0.5, label = "") + 
+                          annotate("segment", x = 2, xend = 2, y = shared_bracket_y, yend = connection_y,  linewidth = 0.5, colour = "black") +
+                          annotate("segment", x = 2, xend = 4, y = connection_y, yend = connection_y,  linewidth = 0.5, colour = "black") +
+                          annotate("segment", x = 4, xend = 4, y = connection_y, yend = ad_bracket_y,  linewidth = 0.5, colour = "black") +
+                          annotate("text", x = 3, y = (connection_y+label_spacer), label = paste0("ROC: ",roc,", q: ",q_value), size = 8, colour = "black") +                          
+                        labs(title= selected_protein, y = expression("Normalized Log"[2]~"(protein abundance)"), x=NULL, parse = T) +
+                        theme_bw() +
+
+                        theme(plot.margin = unit(c(0.5,0.5,0.5,0.5), "cm"), # t, r, b, l 
+                              axis.text.x=element_blank(),
+                              axis.ticks.x=element_blank(),
+                              axis.text.y = element_text(size=24, color = "black", margin = margin(t=0, r=5, b=0, l=10)),
+                              axis.title=element_text(size=26, color = "black"),
+                              legend.position = "none",
+                             plot.title=element_text(size=26, color = "black", hjust = 0.5 )) +
+                        ylim(ymin, ymax) +
+                        # Manually set color scale using significance
+                        scale_fill_manual(values=c("ADD" ="#FCA56B","PDCN" ="#9C62C1","PDD" = "#69B6DD", "HCN" = "grey80"),                                       name = "Condition"))
+
+# Remove commenting below to export panels of individual proteins
+# # Export individual plots as .svg files
+#     print(paste0("4/5: Exporting ",selected_protein, " plot to .svg file"))
+#       ggsave(file = paste("output\\",basename,adpdinfo,"Boxplot_",selected_protein,"_normalizedabundance.svg", sep = ""), plot=boxplot_protein, width=figure_width, height=figure_height)
+# 
+# # Export individual plots as .png files
+#     print(paste0("5/5: Exporting ",selected_protein, " plot to .png file"))
+#       ggsave(file = paste("output\\",basename,adpdinfo,"Boxplot_",selected_protein,"_normalizedabundance.png", sep = ""), plot=boxplot_protein, width=figure_width, height=figure_height)
+
+print(boxplot_protein)      
+      
+} # Closing function
+
+```
+
+
+```{r function_boxplot_legend}
+# Function to generate shared legend to go into larger, multi-protein figures.
+
+boxplot_leg_only <- function(dataframe, selected_protein, figure_height, figure_width){
+    print(paste0("Generating plot for shared legend"))
+        boxplot_leg <- (ggplot((ADPD_proteins_merged_L %>%
+                                    filter(., Category == "ADPD") %>%
+                                    filter(., Figure.Label == selected_protein)), 
+                                    aes(x = Condition, y = Normalized_Protein, fill=Condition)) +
+                        guides(fill = guide_legend(override.aes = list(alpha=1, size = 30)))+ # showing the point in the legend    
+                        geom_boxplot(alpha=0.7, color="black", outlier.shape = NA) +
+                        theme_bw() +
+                        theme(plot.margin = unit(c(0,0,0,0), "cm"), # t, r, b, l 
+                              axis.text.x=element_blank(),
+                              axis.ticks.x=element_blank(),
+                              axis.text.y = element_blank(),
+                              axis.title=element_blank(),
+                              legend.position = "left",
+                              legend.title = element_text(size=28, color = "black"),
+                              legend.text = element_text(size=26, color = "black")) +
+                        # Manually set color scale using significance
+                        scale_fill_manual(values=c("ADD" ="#FCA56B","PDCN" ="#9C62C1","PDD" = "#69B6DD", "HCN" = "grey80"),                                       name = "Condition"))
+print(boxplot_leg)      
+      
+} # Closing function
+
+```
+
+
+<br/><br/>
+
+
+## Figure 7C
+
+$~$
+
+Figure 7C DESCRIPTION
+
+<br/><br/>
+
+To generate the final figure version in the manuscript, a few manual changes were made offline using a vector graphics editor:
+
+* Opened "Figure_A_partial.svg" file in Inkscape.
+
+* Removed the background (3 parts).
+
+* Re-positioned the figure legend and axes labels by changing directional parameters as follows:
+
+  - **Shared x-axis:** Moved to position y = 770 pt (10.694 in)
+
+  - **Shared y-axis:** Moved to position x = 270 pt (3.750 in)
+  
+  - **Figure legend:** Moved to position x = 2275 (31.597 in)
+
+* Select all parts of figure.
+
+* Under menu tab "Edit" -> "Resize page to selection".
+
+* Re-saved as "Figure_A.svg"
+        
+$~$
+
+```{r plot_Fig_ADPD, fig.show='hide', results = "hold", collapse = TRUE}
+# Display names. Currently gene names.
+ADPD_main_genes <- c("INPPL1","VPS13A","DNAJC10","S100B","HTT","VCP","MAP2K2","USP15","JMJD6","CD36")
+  # Protein names instead of gene names, if desired.
+  # proteins_to_plot <- c("SHIP2", "VP13A", "DJC10", "S100B", "HD", "TERA", "MP2K2", "UBP15", "JMJD6", "CD36", "CADH2")
+
+# Setting y-axis title
+y_axis_expression <- paste0(expression("Normalized Log"[2]~"(protein abundance)"))
+
+# Setting height and width of individual box plots (in inches).
+  box_height = 5
+  box_width = 6
+
+# Apply boxplot function to proteins seen increasing in AD 
+  increase_1 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, ADPD_main_genes[1], 0.4, box_height, box_width)
+  increase_2 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, ADPD_main_genes[2], 0.3, box_height, box_width)
+  increase_3 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, ADPD_main_genes[3], 0.3, box_height, box_width)
+  increase_4 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, ADPD_main_genes[4], 0.5, box_height, box_width)
+  increase_5 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, ADPD_main_genes[5], 0.3, box_height, box_width)
+
+# Apply boxplot function to proteins seen decreasing in AD 
+  decrease_1 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, ADPD_main_genes[6], 0.2, box_height, box_width)
+  decrease_2 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, ADPD_main_genes[7], 0.4, box_height, box_width)
+  decrease_3 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, ADPD_main_genes[8], 0.3, box_height, box_width)
+  decrease_4 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, ADPD_main_genes[9], 0.4, box_height, box_width)
+  decrease_5 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, ADPD_main_genes[10], 0.3, box_height, box_width)
+
+
+# Apply function to generate a dummy boxplot from one of the proteins that has a legend which can be extracted later.
+  plot_for_legend <- boxplot_leg_only(ADPD_proteins_roc_rounded_L, ADPD_main_genes[1], box_height, box_width)
+  
+# Extract figure legend from dummy boxplot using cowplot.
+  legend <- get_legend(
+    # create some space to the left of the legend
+    plot_for_legend + theme(legend.box.margin = margin(0, 0, 0, 4))
+  )
+
+# Setting up a shared x axis as a ggplot object to include in final figure.
+  shared_x <- ggplot() +
+              theme_void() +
+              geom_text(aes(0,0,label='Condition'), color="black", hjust = 1, vjust = 0, size = 10) +
+              theme(plot.margin = margin(0, 0, 0, 0, "cm")) +
+              xlab(NULL)
+
+# Setting up a shared x axis as a ggplot object to include in final figure.
+  shared_y <- ggplot() +
+              theme_void() +
+               geom_text(aes(0,0,label=paste0(expression("Normalized Log"[2]~"(protein abundance)")), angle = 90), hjust = 0.5, vjust = 0, size = 10, parse = T) +
+              theme(plot.margin = margin(0, 0, 0, 0, "cm")) +
+              ylab(NULL)
+
+# Using patchwork package to put the semi-final figure together
+    fig_layout <- c(
+      area(t = 1, l = 1.2, b = 2, r = 1.4),
+      area(t = 1, l = 2, b = 1, r = 2),
+      area(t = 1, l = 3, b = 1, r = 3),
+      area(t = 1, l = 4, b = 1, r = 4),
+      area(t = 1, l = 5, b = 1, r = 5),
+      area(t = 1, l = 6, b = 1, r = 6),
+      area(t = 2, l = 2, b = 2, r = 2),
+      area(t = 2, l = 3, b = 2, r = 3),
+      area(t = 2, l = 4, b = 2, r = 4),
+      area(t = 2, l = 5, b = 2, r = 5),
+      area(t = 2, l = 6, b = 2, r = 6),
+      area(t = 3, l = 2, b = 3, r = 6),
+      area(t = 1, l = 7, b = 2, r = 7)
+      )
+    plot(fig_layout)
+
+
+# Applying patchwork layout and altering annotations specified above
+  figure_draft_nolabels_adpd <- (shared_y + increase_1 + increase_2 + increase_3 + increase_4 + increase_5 + decrease_1 + decrease_2 + decrease_3 + decrease_4 + decrease_5 + shared_x + legend + plot_layout(design = fig_layout) & ylab(NULL) & xlab(NULL))  
+
+    
+# Export Figure 7Cs .svg file
+  ggsave(file = paste("output\\",basename,adpdinfo,"Figure_A_partial.svg", sep=""), plot=figure_draft_nolabels_adpd, width=(box_width*6), height=(box_height*3))
+
+```
+
+$~$
+
+```{r plot_Fig_ADPD_print, fig.dim = c((box_width*6),(box_height*3))}
+# Printing plot for Markdown
+figure_draft_nolabels_adpd
+
+```
+
+
+<br/><br/>
+
+
+## Supplementary Figure 7
+
+Supplementary Figure 7 shows 12 proteins that were found to be increased in ADD and involved in vesicle mediated transport.
+
+<br/><br/>
+
+To generate the final supplementary figure version in the manuscript, a few manual changes were made offline using a vector graphics editor:
+
+* Opened "Supplementary_Figure_X_VMT_partial.svg" file in Inkscape.
+
+* Removed the background (3 parts).
+
+* Re-positioned the figure legend and axes labels by changing directional parameters as follows:
+
+  - **Shared x-axis:** Moved to position y = 1150 pt (3.750 in)
+
+  - **Shared y-axis:** Moved to position x = 270 pt (15.972 in)
+  
+  - **Figure legend:** Moved to position x = 1840 pt (25.556 in)
+
+* Select all parts of figure.
+
+* Under menu tab "Edit" -> "Resize page to selection".
+
+* Re-saved as "Supplementary_Figure_X_VMT.svg"
+
+$~$
+
+```{r plot_SuppFig_VMT, fig.show='hide', results = "hold", collapse = TRUE}
+# Removing remaining intermediate objects. Can comment out to review individual panels.
+objects_to_remove_adpd <- c("shared_x","shared_y","plot_for_legend","legend", "increase_1", "increase_2", "increase_3", "increase_4", "increase_5", "decrease_1", "decrease_2", "decrease_3", "decrease_4", "decrease_5", "box_height", "box_width", "y_axis_expression")
+rm(list = objects_to_remove_adpd)
+
+# Targets of proteins that are increased in ADD and they are involved in vesicle mediated transport.
+  # Display names. Currently gene names extracted from Uniprot page.
+targets_vmt <- c("CDH2","VPS18","AP2A1","EXOC5","STX17","MYO5A","CTBP1","AP5S1","MON2","KALRN","SNAPIN","AP1G1")
+
+
+# Setting y-axis title
+y_axis_expression <- paste0(expression("Normalized Log"[2]~"(protein abundance)"))
+
+# Setting height and width of individual box plots (in inches).
+  box_height = 5
+  box_width = 6
+
+# Apply boxplot function to proteins seen increasing in AD related to vesicle mediated transport.
+  plot_1 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_vmt[1], 0.4, box_height, box_width)
+  
+  plot_2 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_vmt[2], 0.4, box_height, box_width)
+  
+  plot_3 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_vmt[3], 0.4, box_height, box_width)
+  
+  plot_4 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_vmt[4], 0.4, box_height, box_width)
+  
+  plot_5 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_vmt[5], 0.4, box_height, box_width)
+  
+  plot_6 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_vmt[6], 0.4, box_height, box_width)
+  
+  plot_7 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_vmt[7], 0.4, box_height, box_width)
+  
+  plot_8 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_vmt[8], 0.4, box_height, box_width)
+  
+  plot_9 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_vmt[9], 0.4, box_height, box_width)
+  
+  plot_10 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_vmt[10], 0.3, box_height, box_width)  
+  
+  plot_11 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_vmt[11], 0.4, box_height, box_width)
+  
+  plot_12 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_vmt[12], 0.4, box_height, box_width)
+
+
+# Apply function to generate a dummy boxplot from one of the proteins that has a legend which can be extracted later.
+  plot_for_legend <- boxplot_leg_only(ADPD_proteins_roc_rounded_L, targets_vmt[1], box_height, box_width)
+  
+# Extract figure legend from dummy boxplot using cowplot.
+  legend <- get_legend(
+    # create some space to the left of the legend
+    plot_for_legend + theme(legend.box.margin = margin(0, 0, 0, 4))
+  )
+
+# Setting up a shared x axis as a ggplot object to include in final figure.
+  shared_x <- ggplot() +
+              theme_void() +
+              geom_text(aes(0,0,label='Condition'), color="black", hjust = 1, vjust = 0, size = 10) +
+              theme(plot.margin = margin(0, 0, 0, 0, "cm")) +
+              xlab(NULL)
+
+# Setting up a shared x axis as a ggplot object to include in final figure.
+  shared_y <- ggplot() +
+              theme_void() +
+               geom_text(aes(0,0,label=paste0(expression("Normalized Log"[2]~"(protein abundance)")), angle = 90), hjust = 0.5, vjust = 0, size = 10, parse = T) +
+              theme(plot.margin = margin(0, 0, 0, 0, "cm")) +
+              ylab(NULL)
+
+# Using patchwork package to put the semi-final figure together
+    fig_layout_vmt <- c(
+      area(t = 1, l = 1, b = 3, r = 1),
+      area(t = 1, l = 2, b = 1, r = 2),
+      area(t = 1, l = 3, b = 1, r = 3),
+      area(t = 1, l = 4, b = 1, r = 4),
+      area(t = 1, l = 5, b = 1, r = 5),
+      area(t = 2, l = 2, b = 2, r = 2),
+      area(t = 2, l = 3, b = 2, r = 3),
+      area(t = 2, l = 4, b = 2, r = 4),
+      area(t = 2, l = 5, b = 2, r = 5),
+      area(t = 3, l = 2, b = 3, r = 2),
+      area(t = 3, l = 3, b = 3, r = 3),
+      area(t = 3, l = 4, b = 3, r = 4),
+      area(t = 3, l = 5, b = 3, r = 5),
+      area(t = 4, l = 2, b = 4, r = 5),
+      area(t = 1, l = 6, b = 3, r = 6)
+      )
+    plot(fig_layout_vmt)
+
+    
+# Applying patchwork layout and altering annotations specified above
+figure_draft_nolabels_vmt <- (shared_y + plot_1 + plot_2 + plot_3 + plot_4 + plot_5 + plot_6 + plot_7 +  plot_8 + plot_9 + plot_10 + plot_11 + plot_12 + shared_x + legend + plot_layout(design = fig_layout_vmt) & ylab(NULL) & xlab(NULL)) 
+
+# Export Figure 7Cs .svg file
+  ggsave(file = paste("output\\",basename,adpdinfo,"Supplementary_Figure_X_","VMT_partial",".svg", sep=""), plot=figure_draft_nolabels_vmt, width=(box_width*5), height=(box_height*4))
+
+```
+
+$~$
+
+```{r plot_SuppFig_VMT_print, fig.dim = c((box_width*5),(box_height*4))}
+# Printing plot for Markdown
+figure_draft_nolabels_vmt
+
+```
+
+
+<br/><br/>
+
+
+## Supplementary Figure 8
+
+Supplementary Figure 8 shows 8 proteins that were found to be increased in ADD and are involved in lipid metabolism.
+
+<br/><br/>
+
+To generate the final supplementary figure version in the manuscript, a few manual changes were made offline using a vector graphics editor:
+
+* Opened "Supplementary_Figure_Y_Lipid_partial.svg" file in Inkscape.
+
+* Removed the background (3 parts).
+
+* Re-positioned the figure legend and axes labels by changing directional parameters as follows:
+
+  - **Shared x-axis:** Moved to position y = 770 pt (10.694 in)
+
+  - **Shared y-axis:** Moved to position x = 270 pt (3.750 in)
+  
+  - **Figure legend:** Moved to position x = 1840 pt (25.556 in)
+
+* Select all parts of figure.
+
+* Under menu tab "Edit" -> "Resize page to selection".
+
+* Re-saved as "Supplementary_Figure_Y_Lipid.svg"
+
+$~$
+
+```{r plot_SuppFig_LipidMetab, fig.show='hide', results = "hold", collapse = TRUE}
+# Removing remaining intermediate objects. Can comment out to review individual panels.
+objects_to_remove_vmt <- c("shared_x","shared_y","plot_for_legend","legend","plot_1", "plot_2", "plot_3", "plot_4", "plot_5", "plot_6", "plot_7",  "plot_8", "plot_9", "plot_10", "plot_11", "plot_12","objects_to_remove_adpd", "box_height", "box_width", "y_axis_expression")
+rm(list = objects_to_remove_vmt)
+
+# Targets of proteins that are increased in ADD and they are involved in lipid metabolism.
+  # Display names. Currently gene names extracted from Uniprot page.
+ targets_lipid <- c("PRKAG1","INPPL1","PAM","VLDLR","IVD","ENPP7","LPCAT3","HADHA")
+
+# Setting y-axis title
+y_axis_expression <- paste0(expression("Normalized Log"[2]~"(protein abundance)"))
+
+# Setting height and width of individual box plots (in inches).
+  box_height = 5
+  box_width = 6
+
+# Apply boxplot function to proteins seen increasing in AD related to vesicle mediated transport.
+  plot_1 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_lipid[1], 0.3, box_height, box_width)
+  plot_2 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_lipid[2], 0.4, box_height, box_width)
+  plot_3 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_lipid[3], 0.4, box_height, box_width)
+  plot_4 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_lipid[4], 0.4, box_height, box_width)
+  plot_5 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_lipid[5], 0.4, box_height, box_width)
+  plot_6 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_lipid[6], 0.3, box_height, box_width)
+  plot_7 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_lipid[7], 0.3, box_height, box_width)
+  plot_8 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_lipid[8], 0.2, box_height, box_width)
+
+
+
+# Apply function to generate a dummy boxplot from one of the proteins that has a legend which can be extracted later.
+  plot_for_legend <- boxplot_leg_only(ADPD_proteins_roc_rounded_L, targets_lipid[1], box_height, box_width)
+  
+# Extract figure legend from dummy boxplot using cowplot.
+  legend <- get_legend(
+    # create some space to the left of the legend
+    plot_for_legend + theme(legend.box.margin = margin(0, 0, 0, 4))
+  )
+
+# Setting up a shared x axis as a ggplot object to include in final figure.
+  shared_x <- ggplot() +
+              theme_void() +
+              geom_text(aes(0,0,label='Condition'), color="black", hjust = 1, vjust = 0, size = 10) +
+              theme(plot.margin = margin(0, 0, 0, 0, "cm")) +
+              xlab(NULL)
+
+# Setting up a shared x axis as a ggplot object to include in final figure.
+  shared_y <- ggplot() +
+              theme_void() +
+               geom_text(aes(0,0,label=paste0(expression("Normalized Log"[2]~"(protein abundance)")), angle = 90), hjust = 0.5, vjust = 0, size = 10, parse = T) +
+              theme(plot.margin = margin(0, 0, 0, 0, "cm")) +
+              ylab(NULL)
+
+# Using patchwork package to put the semi-final figure together
+    fig_layout_lipid <- c(
+      area(t = 1, l = 1, b = 2, r = 1),
+      area(t = 1, l = 2, b = 1, r = 2),
+      area(t = 1, l = 3, b = 1, r = 3),
+      area(t = 1, l = 4, b = 1, r = 4),
+      area(t = 1, l = 5, b = 1, r = 5),
+      area(t = 2, l = 2, b = 2, r = 2),
+      area(t = 2, l = 3, b = 2, r = 3),
+      area(t = 2, l = 4, b = 2, r = 4),
+      area(t = 2, l = 5, b = 2, r = 5),
+      area(t = 3, l = 2, b = 3, r = 5),
+      area(t = 1, l = 6, b = 2, r = 6)
+      )
+    plot(fig_layout_lipid)
+
+    
+# Applying patchwork layout and altering annotations specified above
+figure_draft_nolabels_lipid <- (shared_y + plot_1 + plot_2 + plot_3 + plot_4 + plot_5 + plot_6 + plot_7 +  plot_8 + shared_x + legend + plot_layout(design = fig_layout_lipid) & ylab(NULL) & xlab(NULL)) 
+
+# Export Figure 7Cs .svg file
+  ggsave(file = paste("output\\",basename,adpdinfo,"Supplementary_Figure_Y_","Lipid_partial",".svg", sep=""), plot=figure_draft_nolabels_lipid, width=(box_width*5), height=(box_height*3))
+
+```
+
+$~$
+
+```{r plot_SuppFig_LipidMetab_print, fig.dim = c((box_width*5),(box_height*4))}
+# Printing plot for Markdown
+figure_draft_nolabels_lipid
+
+```
+
+
+<br/><br/>
+
+
+## Supplementary Figure 9
+
+Supplementary Figure 9 shows 16 proteins that were found to be increased in ADD and are involved in Ubiquitin-proteasome mediated protein degradation.
+
+<br/><br/>
+
+To generate the final supplementary figure version in the manuscript, a few manual changes were made offline using a vector graphics editor:
+
+* Opened "Supplementary_Figure_Z_Ubiquitin_partial.svg" file in Inkscape.
+
+* Removed the background (3 parts).
+
+* Re-positioned the figure legend and axes labels by changing directional parameters as follows:
+
+  - **Shared x-axis:** Moved to position y = 1500 pt (3.750 in)
+
+  - **Shared y-axis:** Moved to position x = 270 pt (20.833 in)
+  
+  - **Figure legend:** Moved to position x = 1840 pt (7.632 in)
+
+* Select all parts of figure.
+
+* Under menu tab "Edit" -> "Resize page to selection".
+
+* Re-saved as "Supplementary_Figure_Z_Ubiquitin.svg"
+
+$~$
+
+```{r plot_SuppFig_Ubiquitin, fig.show='hide', results = "hold", collapse = TRUE}
+# Removing remaining intermediate objects. Can comment out to review individual panels.
+objects_to_remove_lipid <- c("shared_x","shared_y","plot_for_legend","legend","plot_1", "plot_2", "plot_3", "plot_4", "plot_5", "plot_6", "plot_7",  "plot_8","objects_to_remove_vmt", "box_height", "box_width", "y_axis_expression")
+rm(list = objects_to_remove_lipid)
+
+# Targets of proteins that are increased in ADD and they are involved in Ubiquitin-proteasome mediated protein degradation.
+  # Display names. Currently gene names extracted from Uniprot page.
+ targets_ubiq <- c("PSMD3","USP15","PSMC6","ATG3","PSMC4","USP4","UFC1","PSMD7","OTUB1","UBB","RBX1","PSMC1","STT3B","UBE2H","PSMC5","UBE2O")
+
+
+# Setting y-axis title
+y_axis_expression <- paste0(expression("Normalized Log"[2]~"(protein abundance)"))
+
+# Setting height and width of individual box plots (in inches).
+  box_height = 5
+  box_width = 6
+
+# Apply boxplot function to proteins seen increasing in AD related to vesicle mediated transport.
+  plot_1 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_ubiq[1], 0.3, box_height, box_width)
+  plot_2 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_ubiq[2], 0.3, box_height, box_width)
+  plot_3 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_ubiq[3], 0.3, box_height, box_width)
+  plot_4 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_ubiq[4], 0.4, box_height, box_width)
+  plot_5 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_ubiq[5], 0.3, box_height, box_width)
+  plot_6 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_ubiq[6], 0.4, box_height, box_width)
+  plot_7 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_ubiq[7], 0.4, box_height, box_width)
+  plot_8 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_ubiq[8], 0.3, box_height, box_width)
+  plot_9 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_ubiq[9], 0.4, box_height, box_width)
+  plot_10 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_ubiq[10], 0.3, box_height, box_width)  
+  plot_11 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_ubiq[11], 0.4, box_height, box_width)
+  plot_12 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_ubiq[12], 0.4, box_height, box_width)
+  plot_13 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_ubiq[13], 0.4, box_height, box_width)
+  plot_14 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_ubiq[14], 0.3, box_height, box_width)
+  plot_15 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_ubiq[15], 0.3, box_height, box_width)
+  plot_16 <- boxplot_yax_nox_noleg(ADPD_proteins_roc_rounded_L, targets_ubiq[16], 0.3, box_height, box_width)
+
+
+# Apply function to generate a dummy boxplot from one of the proteins that has a legend which can be extracted later.
+  plot_for_legend <- boxplot_leg_only(ADPD_proteins_roc_rounded_L, targets_ubiq[1], box_height, box_width)
+  
+# Extract figure legend from dummy boxplot using cowplot.
+  legend <- get_legend(
+    # create some space to the left of the legend
+    plot_for_legend + theme(legend.box.margin = margin(0, 0, 0, 4))
+  )
+
+# Setting up a shared x axis as a ggplot object to include in final figure.
+  shared_x <- ggplot() +
+              theme_void() +
+              geom_text(aes(0,0,label='Condition'), color="black", hjust = 1, vjust = 0, size = 10) +
+              theme(plot.margin = margin(0, 0, 0, 0, "cm")) +
+              xlab(NULL)
+
+# Setting up a shared x axis as a ggplot object to include in final figure.
+  shared_y <- ggplot() +
+              theme_void() +
+               geom_text(aes(0,0,label=paste0(expression("Normalized Log"[2]~"(protein abundance)")), angle = 90), hjust = 0.5, vjust = 0, size = 10, parse = T) +
+              theme(plot.margin = margin(0, 0, 0, 0, "cm")) +
+              ylab(NULL)
+
+# Using patchwork package to put the semi-final figure together
+    fig_layout_ubiq <- c(
+      area(t = 1, l = 1, b = 4, r = 1),
+      area(t = 1, l = 2, b = 1, r = 2),
+      area(t = 1, l = 3, b = 1, r = 3),
+      area(t = 1, l = 4, b = 1, r = 4),
+      area(t = 1, l = 5, b = 1, r = 5),
+      area(t = 2, l = 2, b = 2, r = 2),
+      area(t = 2, l = 3, b = 2, r = 3),
+      area(t = 2, l = 4, b = 2, r = 4),
+      area(t = 2, l = 5, b = 2, r = 5),
+      area(t = 3, l = 2, b = 3, r = 2),
+      area(t = 3, l = 3, b = 3, r = 3),
+      area(t = 3, l = 4, b = 3, r = 4),
+      area(t = 3, l = 5, b = 3, r = 5),
+      area(t = 4, l = 2, b = 4, r = 2),
+      area(t = 4, l = 3, b = 4, r = 3),
+      area(t = 4, l = 4, b = 4, r = 4),
+      area(t = 4, l = 5, b = 4, r = 5),
+      area(t = 5, l = 2, b = 5, r = 5),
+      area(t = 1, l = 6, b = 4, r = 6)
+      )
+    plot(fig_layout_ubiq)
+
+    
+# Applying patchwork layout and altering annotations specified above
+figure_draft_nolabels_ubiq <- (shared_y + plot_1 + plot_2 + plot_3 + plot_4 + plot_5 + plot_6 + plot_7 +  plot_8 + plot_9 + plot_10 + plot_11 + plot_12 + plot_13 + plot_14 + plot_15 + plot_16 + shared_x + legend + plot_layout(design = fig_layout_ubiq) & ylab(NULL) & xlab(NULL)) 
+
+# Export Figure 7Cs .svg file
+  ggsave(file = paste("output\\",basename,adpdinfo,"Supplementary_Figure_Z_","Ubiquitin_partial",".svg", sep=""), plot=figure_draft_nolabels_ubiq, width=(box_width*5), height=(box_height*5))
+  
+```
+
+$~$
+
+```{r plot_SuppFig_Ubiquitin_print, fig.dim = c((box_width*5),(box_height*4))}
+# Printing plot for Markdown
+figure_draft_nolabels_ubiq
+
+```
+
+$~$
+
+```{r removing_intermediate_objects, results='hide'}
+# Removing remaining intermediate objects. Can comment out to review individual panels.
+objects_to_remove_ubiq <- c("shared_x","shared_y","plot_for_legend","legend","plot_1", "plot_2", "plot_3", "plot_4", "plot_5", "plot_6", "plot_7",  "plot_8", "plot_9", "plot_10", "plot_11", "plot_12", "plot_13", "plot_14", "plot_15", "plot_16", "objects_to_remove_lipid", "box_height", "box_width", "y_axis_expression")
+rm(list = objects_to_remove_ubiq)
+
+
+```
