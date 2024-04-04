@@ -2,7 +2,7 @@
 
 This repo contains most of the input files and the basic analyses used in the manuscript "Mag-Net: Rapid enrichment of membrane-bound particles enables high coverage quantitative analysis of the plasma proteome", which is currently located on bioRxiv under the DOI [10.1101/2023.06.10.544439](https://doi.org/10.1101/2023.06.10.544439). Any files not located here are freely and openly accessible on the [Mag-Net page of PanoramaWeb](https://panoramaweb.org/Mag-Net.url).
 
-Data was exported using the Skyline document grid. Analyses was perfomed using Skyline and R scripts.
+Data was exported using the Skyline document grid. Analyses was perfomed using Skyline, R scripts, R Markdown files, and Jupyter Notebooks.
 
 ### Repository Layout
 
@@ -25,6 +25,11 @@ Scripts are located in the **bin** folder.
   - Figure 3C
   - Figure 4A
   - Figure 4B
+
+* **Fig7b_Fig7c.ipynb:** Jupyter Notebook that is used to generate the following figure panels:
+
+  - Figure 7A
+  - Figure 7B
 
 * **Figs_2C_3A_3B_5B__SuppFigs_S1_S5_S6.Rmd:** R Markdown file that is used to generate the following figure panels:
 
@@ -131,22 +136,29 @@ Details of script used broken down for each figure panel.
   - **5B:** Half-violin/ box plot of all peptides in MMCC experiment. Panel generated in "Figs_2C_3A_3B_5B__SuppFigs_S1_S5_S6.Rmd".
 
 * Figure 6:
-  - **6A:** Log2 peptide abundance of replicate Mag-Net preparation. _Script upload pending._
-  - **6B:** Effect of data processing on CVs. _Script upload pending._
+  - **6A:** Schematic describing dementia cohort. Generated in an image processor. No script or files on github.
+  - **6B:** Plotting peptide detections and FDR levels in each experimental and quality control sample. _Script upload pending._
+  - **6C:** Log2 peptide abundance of replicate Mag-Net preparation. _Script upload pending._
+  - **6D:** Effect of data processing on CVs. _Script upload pending._
 
+* Figure 7:
+  - **7A:** Heatmap of proteins with ROC > 0.7 from 6 pairwise analyses. _Script upload pending._
+  - **7B:** Example receiver operator characteristic (ROC) curve. _Script upload pending._
+  - **7C:** Panel of protein-level box plots annotated with ROC and q-value of 10 proteins that were found to be specifically increased in ADD. Panel generated in "Fig_7C__SuppFigs_S7_S8_S9.Rmd".
+  
 * Supplementary Figure S1:
   - Volcano plot annotated with specific extracellular vesicle markers and common plamsa proteins. Panel generated in "Figs_2C_3A_3B_5B__SuppFigs_S1_S5_S6.Rmd".
 
 * Supplementary Figure S2:
-  - Image of volcano plot exported from Skyline. 
+  - Image of volcano plot exported from Skyline comparing hydroxyl and SAX beads on the same unfractionated plasma. 
 
 * Supplementary Figure S3:
-  - **S3A:**  Image of volcano plot exported from Skyline. No script or files on github.
+  - **S3A:**  Image of volcano plot exported from Skyline comparing total plasma digested using hydroxyl beads and the same plasma processed with Mag-Net using hydrocyl beads. No script or files on github.
   - **S3B:**  Image of top 10 Jensen Compartments. No script or files on github.
 
 * Supplementary Figure S4:
   - **S4A:**  Image of top 10 GO terms in Hydroxyl bead Mag-Net capture. No script or files on github.
-  - **S4B:**  Image of volcano plot exported from Skyline. No script or files on github.
+  - **S4B:**  Image of volcano plot exported from Skyline comparing plasma processed with Mag-Net using both hydroxyl and SAX beads. No script or files on github.
   - **S4C:**  Image of top 10 GO terms in SAX bead Mag-Net capture. No script or files on github.
 
 * Supplementary Figure S5:
@@ -157,3 +169,16 @@ Details of script used broken down for each figure panel.
 
 * Supplementary Figure S6:
   - Half-violin/ box plot of all peptides in FT experiment. Panel generated in "Figs_2C_3A_3B_5B__SuppFigs_S1_S5_S6.Rmd".
+ 
+* Supplementary Figure S7:
+  - Panel of protein-level box plots annotated with ROC and q-value of 12 proteins that were found to be specifically increased in ADD and involved in vesicle mediated transport. Panel generated in "Fig_7C__SuppFigs_S7_S8_S9.Rmd".
+ 
+* Supplementary Figure S8:
+  - Panel of protein-level box plots annotated with ROC and q-value of 8 proteins that were found to be specifically increased in ADD and are involved in lipid metabolism. Panel generated in "Fig_7C__SuppFigs_S7_S8_S9.Rmd".
+ 
+* Supplementary Figure S9:
+  - Panel of protein-level box plots annotated with ROC and q-value of 16 proteins that were found to be specifically increased in ADD and are involved in Ubiquitin-proteasome mediated protein degradation. Panel generated in "Fig_7C__SuppFigs_S7_S8_S9.Rmd".
+ 
+* Supplementary Figure S10:
+  - Panel of 5 ROC curves illustrating development of an SVM classifier. _Script upload pending._
+
