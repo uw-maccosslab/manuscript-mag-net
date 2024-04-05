@@ -8,9 +8,9 @@ Data was exported using the Skyline document grid. Analyses was perfomed using S
 
 * **KingFisher Methods:** Contains instrument methods for KingFisher System
 
-* **bin:** Contains scripts used to generate figures
+* **bin:** Contains scripts used to generate figures and preprocessing
 
-* **csv:** Contains csv files used as input for the scripts in the bin folder.
+* **csv:** Contains csv files used as input and output for the scripts in the bin folder.
 
 
 $~$
@@ -19,6 +19,21 @@ $~$
 ## Scripts
 
 Scripts are located in the **bin** folder.
+
+* **main.r:** R script that orchestrates data wrangling and normalization:
+
+	- R environment (version >= 3.6.0 recommended).
+	- Required R packages:
+	  - `readr`
+	  - `dplyr`
+	  - `limma`
+	  - `pcaMethods`
+	  - `R6`
+	- Ensure all required packages are installed before running the script. Use `install.packages("package_name")` to install any missing packages.
+	- Usage: navigate to the project directory in your R environment and run the `main.r` script:
+
+		```r
+		source("main.r")
 
 * **Fig2c_Fig4a_Fig4b.r:** R script that is used to generate the following figure panels:
 
