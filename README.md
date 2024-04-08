@@ -40,6 +40,7 @@ Scripts are located in the **bin** folder.
   - Figure 3C
   - Figure 4A
   - Figure 4B
+  - Figure 7A
 
 * **Fig7b_Fig7c.ipynb:** Jupyter Notebook that is used to generate the following figure panels:
 
