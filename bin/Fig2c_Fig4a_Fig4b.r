@@ -162,4 +162,67 @@ range_EV
 #Insets of rank 1-400 generated from same code, but with + scale_x_continuous(limits=c(1,400))
 #labels manually adjusted in pdf
 
+#Insets of rank 1-400 generated from same code, but with + scale_x_continuous(limits=c(1,400))
+#labels manually adjusted in pdf
+
+
+# Figure 7a
+#library(pheatmap, quietly=T)
+
+#data files for the protein results of classifiers
+Cprot.df <- read.csv("20230812-particlesADPD_pilot-nobatchProt4.csv", stringsAsFactors = FALSE)
+Cmeta.df <- read.csv("TPAD HC_AD_PDD_PD-noMCI Plasma - Metadata.csv", stringsAsFactors = FALSE)
+Croc.res <- read.csv("mag-net_cohort_biomarker_rocs.csv", stringsAsFactors = FALSE)
+
+
+Sorder <- names(Cprot.df[,2:ncol(Cprot.df)])
+
+# removing the control samples from the metadata file 
+Cmeta <- Cmeta.df[-grep("CP|KP", Cmeta.df$SampleID),]
+
+#reordering to match the protein results
+Cmeta <- Cmeta %>% dplyr::arrange(factor(Cmeta$SampleID, levels = Sorder))
+
+#dataframe finessing
+Cprot <- Cprot.df
+names(Cprot)[1] <- "Protein.Name"
+
+Cmeta$Age <- as.numeric(Cmeta$Age)
+
+# compiling lists of all the proteins that pass a 0.7 cutoff for each classifier
+AD.roc <- Croc.res %>% dplyr::filter(AD.ROC>0.7) %>% dplyr::select(Protein.Name)
+PDD.roc <- Croc.res %>% dplyr::filter(PDD.ROC>0.7) %>% dplyr::select(Protein.Name)
+PDnMCI.roc <- Croc.res %>% dplyr::filter(PD.noMCI.ROC>0.7) %>% dplyr::select(Protein.Name)
+HC.roc <- Croc.res %>% dplyr::filter(HC.ROC>0.7) %>% dplyr::select(Protein.Name)
+Dem.roc <- Croc.res %>% dplyr::filter(Dementia.ROC>0.7) %>% dplyr::select(Protein.Name)
+Park.roc <- Croc.res %>% dplyr::filter(Parkinson.s.ROC>0.7) %>% dplyr::select(Protein.Name)
+
+
+roc_list <- list(AD.roc, PDD.roc, PDnMCI.roc, HC.roc, Dem.roc, Park.roc)
+
+All.roc <- Reduce(function(x, y) merge(x, y, all=TRUE), roc_list)
+
+rocNames <- All.roc$Protein.Name
+
+roc.prot <- Cprot[Cprot$Protein.Name %in% rocNames,]
+dim(roc.prot)
+
+# extracting the protein values for all the roc proteins
+mdf <- data.frame(roc.prot[,2:ncol(roc.prot)])
+rownames(mdf) <- roc.prot$Protein.Name
+mdf <- data.matrix(mdf)
+
+#adjusting the annotations & color scheme for the heatmap
+annotation <- Cmeta %>% select(Condition, Age, Sex)
+rownames(annotation) <- Cmeta$SampleID
+ann_colors = list(
+  Condition = c("AD" ="#fca56b","PD-noMCI" ="#9c62c1","PDD" = "#69b6dd", "HC" = "grey80"),
+  Sex = c(Female="palevioletred1", Male="lightgoldenrod"))
+
+# heatmap plot
+pheatmap(mdf, border_color=NA, scale="row", annotation_col=annotation, 
+         annotation_colors = ann_colors,
+         clustering_method="ward.D2",
+         show_rownames = F, show_colnames = F, 
+         color=colorRampPalette(c("blue3", "white", "red2"))(35) )
 
