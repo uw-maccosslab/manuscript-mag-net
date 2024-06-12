@@ -44,8 +44,8 @@ Scripts are located in the **bin** folder.
 
 * **Fig7b_Fig7c.ipynb:** Jupyter Notebook for training an SVM to classify disease state, used to generate the following figure panels:
 
-  - Figure 7A
   - Figure 7B
+  - Supplementary figure S10
 
 * **Figs_2C_3A_3B_5B__SuppFigs_S1_S5_S6.Rmd:** R Markdown file that is used to generate the following figure panels:
 
