@@ -42,7 +42,7 @@ Scripts are located in the **bin** folder.
   - Figure 4B
   - Figure 7A
 
-* **Fig7b_Fig7c.ipynb:** Jupyter Notebook that is used to generate the following figure panels:
+* **Fig7b_Fig7c.ipynb:** Jupyter Notebook for training an SVM to classify disease state, used to generate the following figure panels:
 
   - Figure 7A
   - Figure 7B
