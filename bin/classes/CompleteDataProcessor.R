@@ -36,6 +36,27 @@ CompleteDataProcessor <- R6Class("CompleteDataProcessor",
                                      batchEffectRemover$removeControls()
                                      batchEffectRemover$removeBatchEffect()
                                      self$batchEffectRemovedData <- batchEffectRemover$nobatchProt
+                                   },
+                                   
+                                   # Accessor methods
+                                   getDat = function() {
+                                     return(self$dat)
+                                   },
+                                   
+                                   getNormalizedData = function() {
+                                     return(self$normalizedData)
+                                   },
+                                   
+                                   getImputedData = function() {
+                                     return(self$imputedData)
+                                   },
+                                   
+                                   getBatchEffectRemovedData = function() {
+                                     return(self$batchEffectRemovedData)
+                                   },
+                                   
+                                   getMetaDt = function() {
+                                     return(self$metaDt)
                                    }
                                  )
 )
