@@ -40,12 +40,23 @@ Scripts are located in the **bin** folder.
   - Figure 3C
   - Figure 4A
   - Figure 4B
+  
+* **Fig6b.r:** R script that is used to generate the following figure panels:
+
+  - Figure 6B
+  
+* **Fig6c.r:** R script that is used to generate the following figure panels:
+
+  - Figure 6C
+  
+* **Fig6d.r:** R script that is used to generate the following figure panels:
+
+  - Figure 6D
+
+* **Fig7b_Fig7c.ipynb:** Jupyter Notebook that is used to generate the following figure panels:
+
   - Figure 7A
-
-* **Fig7b_Fig7c.ipynb:** Jupyter Notebook for training an SVM to classify disease state, used to generate the following figure panels:
-
   - Figure 7B
-  - Supplementary figure S10
 
 * **Figs_2C_3A_3B_5B__SuppFigs_S1_S5_S6.Rmd:** R Markdown file that is used to generate the following figure panels:
 
@@ -153,9 +164,9 @@ Details of script used broken down for each figure panel.
 
 * Figure 6:
   - **6A:** Schematic describing dementia cohort. Generated in an image processor. No script or files on github.
-  - **6B:** Plotting peptide detections and FDR levels in each experimental and quality control sample. _Script upload pending._
-  - **6C:** Log2 peptide abundance of replicate Mag-Net preparation. _Script upload pending._
-  - **6D:** Effect of data processing on CVs. _Script upload pending._
+  - **6B:** Plotting peptide detections and FDR levels in each experimental and quality control sample.
+  - **6C:** Log2 peptide abundance of replicate Mag-Net preparation.
+  - **6D:** Effect of data processing on CVs.
 
 * Figure 7:
   - **7A:** Heatmap of proteins with ROC > 0.7 from 6 pairwise analyses. _Script upload pending._
