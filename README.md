@@ -51,7 +51,7 @@ Scripts are located in the **bin** folder.
 * **Fig7b_Fig7c.ipynb:** Jupyter Notebook including machine learning that is used to generate the following figure panels:
 
   - Figure 7B
-  - Supplementary figure S10
+  - Supplementary figure S12
 
 * **Fig2c_Fig4a_Fig4b.r:** R script that is used to generate the following figure panels:
 
@@ -66,18 +66,22 @@ Scripts are located in the **bin** folder.
    - Figure 3A
    - Figure 3B
    - Figure 5B
-   - Supplementary Figure S1
-   - Supplementary Figure S5
-   - Supplementary Figure S6
+   - Supplementary Figure S2
+   - Supplementary Figure S7
+   - Supplementary Figure S8
 
 * **Fig_7C__SuppFigs_S7_S8_S9.Rmd:** R Markdown file that is used to generate the following figure panels:
 
    - Figure 7C
-   - Supplementary Figure S7
-   - Supplementary Figure S8
    - Supplementary Figure S9
+   - Supplementary Figure S10
+   - Supplementary Figure S11
 
+* **SuppFig_S3.Rmd:** R Markdown file that is used to generate the following figure panels:
 
+   - Supplementary Figure S3
+
+     
 $~$
 
 
@@ -177,6 +181,18 @@ $~$
 
 * **Protein_List.csv:** Table used to extract and label of proteins of interest highlighted in Enrichment/Depletion plots (Figure 3A and 3B), in the volcano plot annotated with specific extracellular vesicle markers and common plamsa proteins. (Supplementary Figure S1), and AD/PD box plots (Figure 7C, Supplementary Figure S7-S9).
 
+$~$
+
+### SuppFig_S3.Rmd input files 
+
+#### ***Skyline Document:*** SAX-EV vs OH PAC-Plasma-EncV2score_2023-06-02_10-52-08.sky.zip
+
+* **2024May31_EnrichDeplet_TIC_FCtype.csv:** Dated output from **Figs_2C_3A_3B_5B__SuppFigs_S1_S5_S6.Rmd** with fold changes of Mag-Net enriched fraction relatice to matched total undepleted plasma.
+
+* **EXOCARTA_PROTEIN_MRNA_DETAILS_5_2024_06_18.csv:** List of proteins and mRNA data downloaded from the ExoCarta database on June 18, 2024. 
+
+* **EXOCARTA_PROTEIN_MRNA_DETAILS_5_idmapping_2024_06_18.csv:** Protein list filtered from ExoCarta database after matching associated gene names to UniProt Accession Numbers.
+
 
 $~$
 
@@ -221,37 +237,46 @@ Details of script used broken down for each figure panel.
   - **7C:** Panel of protein-level box plots annotated with ROC and q-value of 10 proteins that were found to be specifically increased in ADD. Panel generated in "Fig_7C__SuppFigs_S7_S8_S9.Rmd".
   
 * Supplementary Figure S1:
-  - Volcano plot annotated with specific extracellular vesicle markers and common plamsa proteins. Panel generated in "Figs_2C_3A_3B_5B__SuppFigs_S1_S5_S6.Rmd".
+  - Method figure illustrating the two cycle Mag-Net protocol versus the single cycle total plasma PAC protocol. No script or files on github.
 
 * Supplementary Figure S2:
-  - Image of volcano plot exported from Skyline comparing hydroxyl and SAX beads on the same unfractionated plasma. 
+  - Volcano plot annotated with specific extracellular vesicle markers and common plamsa proteins. Panel generated in "Figs_2C_3A_3B_5B__SuppFigs_S1_S5_S6.Rmd".
 
 * Supplementary Figure S3:
-  - **S3A:**  Image of volcano plot exported from Skyline comparing total plasma digested using hydroxyl beads and the same plasma processed with Mag-Net using hydroxyl beads. No script or files on github.
-  - **S3B:**  Image of top 10 Jensen Compartments. No script or files on github.
-
+  - **S3A:**  Histogram of the fold-changes of the 729 proteins found in Mag-Net that matched with any of the top 1000 proteins by abbundance in the ExoCarta human protein/mRNA database. Panel generated in "SuppFig_S3.Rmd".
+  - **S3B:**  Histogram of the fold-changes of the 100 proteins found in Mag-Net that matched with any of the top 100 proteins by abbundance in the ExoCarta human protein/mRNA database. Panel generated in "SuppFig_S3.Rmd".
+  - **S3C:**  Labeled volcano plot of the fold-changes of the 729 proteins found in Mag-Net that matched with any of the top 1000 proteins by abbundance in the ExoCarta human protein/mRNA database. Labeled top 15 most frequently identified proteins that are enriched, and the 5 most frequently identified proteins that are depleted in Mag-Net. Panel generated in "SuppFig_S3.Rmd".
+  - **S3D:**  Labeled volcano plot of the fold-changes of the 100 proteins found in Mag-Net that matched with any of the top 1000 proteins by abbundance in the ExoCarta human protein/mRNA database. Labeled top 15 most frequently identified proteins that are enriched, and the only 3 most frequently identified proteins that are depleted in Mag-Net. Panel generated in "SuppFig_S3.Rmd".
+    
 * Supplementary Figure S4:
-  - **S4A:**  Image of top 10 GO terms in Hydroxyl bead Mag-Net capture. No script or files on github.
-  - **S4B:**  Image of volcano plot exported from Skyline comparing plasma processed with Mag-Net using both hydroxyl and SAX beads. No script or files on github.
-  - **S4C:**  Image of top 10 GO terms in SAX bead Mag-Net capture. No script or files on github.
-
+  - Image of volcano plot exported from Skyline comparing hydroxyl and SAX beads on the same unfractionated plasma.
+    
 * Supplementary Figure S5:
-  - **S5A:** MMCC visual summary. Generated in an image processor. No script or files on github.
-  - **S5B:** CD9 - Protein abundance of replicate injections exported from Skyline document grid. Limit of quantitation (LOQ), and Limit of Detection (LOD) calculated using variation of python script "calculate_loq.py" in github repo [iontrap_vs_orbitrap](https://github.com/uw-maccosslab/iontrap_vs_orbitrap). Panel generated in "Figs_2C_3A_3B_5B__SuppFigs_S1_S5_S6.Rmd".
-  - **S5C:** NCAM1 - Protein abundance of replicate injections exported from Skyline document grid. Limit of quantitation (LOQ), and Limit of Detection (LOD) calculated using variation of python script "calculate_loq.py" in github repo [iontrap_vs_orbitrap](https://github.com/uw-maccosslab/iontrap_vs_orbitrap). Panel generated in "Figs_2C_3A_3B_5B__SuppFigs_S1_S5_S6.Rmd".
-  - **S5D:** CD9 - Protein abundance of replicate injections exported from Skyline document grid. Limit of quantitation (LOQ), and Limit of Detection (LOD) calculated using variation of python script "calculate_loq.py" in github repo [iontrap_vs_orbitrap](https://github.com/uw-maccosslab/iontrap_vs_orbitrap). Panel generated in "Figs_2C_3A_3B_5B__SuppFigs_S1_S5_S6.Rmd".
-
+  - **S5A:**  Image of volcano plot exported from Skyline comparing total plasma digested using hydroxyl beads and the same plasma processed with Mag-Net using hydroxyl beads. No script or files on github.
+  - **S5B:**  Image of top 10 Jensen Compartments. No script or files on github.
+ 
 * Supplementary Figure S6:
+  - **S6A:**  Image of top 10 GO terms in Hydroxyl bead Mag-Net capture. No script or files on github.
+  - **S6B:**  Image of volcano plot exported from Skyline comparing plasma processed with Mag-Net using both hydroxyl and SAX beads. No script or files on github.
+  - **S6C:**  Image of top 10 GO terms in SAX bead Mag-Net capture. No script or files on github.
+
+* Supplementary Figure S7:
+  - **S7A:** MMCC visual summary. Generated in an image processor. No script or files on github.
+  - **S7B:** CD9 - Protein abundance of replicate injections exported from Skyline document grid. Limit of quantitation (LOQ), and Limit of Detection (LOD) calculated using variation of python script "calculate_loq.py" in github repo [iontrap_vs_orbitrap](https://github.com/uw-maccosslab/iontrap_vs_orbitrap). Panel generated in "Figs_2C_3A_3B_5B__SuppFigs_S1_S5_S6.Rmd".
+  - **S7C:** NCAM1 - Protein abundance of replicate injections exported from Skyline document grid. Limit of quantitation (LOQ), and Limit of Detection (LOD) calculated using variation of python script "calculate_loq.py" in github repo [iontrap_vs_orbitrap](https://github.com/uw-maccosslab/iontrap_vs_orbitrap). Panel generated in "Figs_2C_3A_3B_5B__SuppFigs_S1_S5_S6.Rmd".
+  - **S7D:** CD9 - Protein abundance of replicate injections exported from Skyline document grid. Limit of quantitation (LOQ), and Limit of Detection (LOD) calculated using variation of python script "calculate_loq.py" in github repo [iontrap_vs_orbitrap](https://github.com/uw-maccosslab/iontrap_vs_orbitrap). Panel generated in "Figs_2C_3A_3B_5B__SuppFigs_S1_S5_S6.Rmd".
+
+* Supplementary Figure S8:
   - Half-violin/ box plot of all peptides in FT experiment. Panel generated in "Figs_2C_3A_3B_5B__SuppFigs_S1_S5_S6.Rmd".
  
-* Supplementary Figure S7:
+* Supplementary Figure S9:
   - Panel of protein-level box plots annotated with ROC and q-value of 12 proteins that were found to be specifically increased in ADD and involved in vesicle mediated transport. Panel generated in "Fig_7C__SuppFigs_S7_S8_S9.Rmd".
  
-* Supplementary Figure S8:
+* Supplementary Figure S10:
   - Panel of protein-level box plots annotated with ROC and q-value of 8 proteins that were found to be specifically increased in ADD and are involved in lipid metabolism. Panel generated in "Fig_7C__SuppFigs_S7_S8_S9.Rmd".
  
-* Supplementary Figure S9:
+* Supplementary Figure S11:
   - Panel of protein-level box plots annotated with ROC and q-value of 16 proteins that were found to be specifically increased in ADD and are involved in Ubiquitin-proteasome mediated protein degradation. Panel generated in "Fig_7C__SuppFigs_S7_S8_S9.Rmd".
  
-* Supplementary Figure S10:
+* Supplementary Figure S12:
   - Panel of 5 ROC curves illustrating development of an SVM classifier. Panel generated in "Fig7b_Fig7c.ipynb".
