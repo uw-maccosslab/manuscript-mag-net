@@ -12,7 +12,7 @@ output:
 
 # Overview
 
-R Markdown to generate box plots for Figure 7C and Supplementary Figures 7, 8, and 9
+R Markdown to generate box plots for Figure 7C and Supplementary Figures S9, S10, and S11
 
 Figures are intended to show specific protein changes between healthy controls and individuals with neurological degeneration including Parkinson's Disease (Cognitively Normal), Parkinson's Disease, Alzheimer's Disease. 
 
@@ -66,11 +66,11 @@ This R Markdown produces 4 figures (as .svg files):
 
 * **Figure 7C:** Panel of 10 individual protein box plots. The top row of 5 proteins were found to be increased in ADD, while the bottom row of 5 proteins decreased.
 
-* **Supplementary Figure 7:** Panel of 12 individual protein box plots. Proteins were found to be increased in ADD and involved in vesicle mediated transport
+* **Supplementary Figure 9:** Panel of 12 individual protein box plots. Proteins were found to be increased in ADD and involved in vesicle mediated transport
 
-* **Supplementary Figure 8:** Panel of 8 individual protein box plots. Proteins were found to proteins that were found to be increased in ADD and are involved in lipid metabolism.
+* **Supplementary Figure 10:** Panel of 8 individual protein box plots. Proteins were found to proteins that were found to be increased in ADD and are involved in lipid metabolism.
 
-* **Supplementary Figure 9:** Panel of 16 individual protein box plots. Proteins were found to proteins that were found to be increased in ADD and are involved in Ubiquitin-proteasome mediated protein degradation.
+* **Supplementary Figure 11:** Panel of 16 individual protein box plots. Proteins were found to proteins that were found to be increased in ADD and are involved in Ubiquitin-proteasome mediated protein degradation.
 
 
 $~$
@@ -344,7 +344,7 @@ $~$
 
 # Figures {.tabset .tabset-fade}
 
-Figure 7C and Supplementary Figures 7, 8, and 9 
+Figure 7C and Supplementary Figures 9, 10, and 11
 
 The boxplot figures summarize the following results:
 
@@ -620,15 +620,15 @@ figure_7C_nolabels_adpd
 <br/><br/>
 
 
-## Supplementary Figure 7
+## Supplementary Figure 9
 
-Supplementary Figure 7 shows 12 proteins that were found to be increased in ADD and involved in vesicle mediated transport.
+Supplementary Figure 9 shows 12 proteins that were found to be increased in ADD and involved in vesicle mediated transport.
 
 <br/><br/>
 
 To generate the final supplementary figure version in the manuscript, a few manual changes were made offline using a vector graphics editor:
 
-* Opened "Supplementary_Figure_7_VMT_partial.svg" file in Inkscape.
+* Opened "Supplementary_Figure_9_VMT_partial.svg" file in Inkscape.
 
 * Removed the background (3 parts).
 
@@ -644,7 +644,7 @@ To generate the final supplementary figure version in the manuscript, a few manu
 
 * Under menu tab "Edit" -> "Resize page to selection".
 
-* Re-saved as "Supplementary_Figure_7_VMT.svg"
+* Re-saved as "Supplementary_Figure_9_VMT.svg"
 
 $~$
 
@@ -736,10 +736,10 @@ y_axis_expression <- paste0(expression("Normalized Log"[2]~"(protein abundance)"
 
     
 # Applying patchwork layout and altering annotations specified above
-figure_s7_draft_nolabels_vmt <- (shared_y + plot_1 + plot_2 + plot_3 + plot_4 + plot_5 + plot_6 + plot_7 +  plot_8 + plot_9 + plot_10 + plot_11 + plot_12 + shared_x + legend + plot_layout(design = fig_layout_vmt) & ylab(NULL) & xlab(NULL)) 
+figure_s9_draft_nolabels_vmt <- (shared_y + plot_1 + plot_2 + plot_3 + plot_4 + plot_5 + plot_6 + plot_7 +  plot_8 + plot_9 + plot_10 + plot_11 + plot_12 + shared_x + legend + plot_layout(design = fig_layout_vmt) & ylab(NULL) & xlab(NULL)) 
 
 # Export Figure 7Cs .svg file
-  ggsave(file = paste("output\\plots\\",basename,adpdinfo,"Supplementary_Figure_7_","VMT_partial",".svg", sep=""), plot=figure_s7_draft_nolabels_vmt, width=(box_width*5), height=(box_height*4))
+  ggsave(file = paste("output\\plots\\",basename,adpdinfo,"Supplementary_Figure_9_","VMT_partial",".svg", sep=""), plot=figure_s9_draft_nolabels_vmt, width=(box_width*5), height=(box_height*4))
 
 ```
 
@@ -747,7 +747,7 @@ $~$
 
 ```{r plot_SuppFig_VMT_print, fig.dim = c((box_width*5),(box_height*4))}
 # Printing plot for Markdown
-figure_s7_draft_nolabels_vmt
+figure_s9_draft_nolabels_vmt
 
 ```
 
@@ -755,15 +755,15 @@ figure_s7_draft_nolabels_vmt
 <br/><br/>
 
 
-## Supplementary Figure 8
+## Supplementary Figure 10
 
-Supplementary Figure 8 shows 8 proteins that were found to be increased in ADD and are involved in lipid metabolism.
+Supplementary Figure 10 shows 8 proteins that were found to be increased in ADD and are involved in lipid metabolism.
 
 <br/><br/>
 
 To generate the final supplementary figure version in the manuscript, a few manual changes were made offline using a vector graphics editor:
 
-* Opened "Supplementary_Figure_8_Lipid_partial.svg" file in Inkscape.
+* Opened "Supplementary_Figure_10_Lipid_partial.svg" file in Inkscape.
 
 * Removed the background (3 parts).
 
@@ -779,7 +779,7 @@ To generate the final supplementary figure version in the manuscript, a few manu
 
 * Under menu tab "Edit" -> "Resize page to selection".
 
-* Re-saved as "Supplementary_Figure_8_Lipid.svg"
+* Re-saved as "Supplementary_Figure_10_Lipid.svg"
 
 $~$
 
@@ -852,10 +852,10 @@ y_axis_expression <- paste0(expression("Normalized Log"[2]~"(protein abundance)"
 
     
 # Applying patchwork layout and altering annotations specified above
-figure_s8_nolabels_lipid <- (shared_y + plot_1 + plot_2 + plot_3 + plot_4 + plot_5 + plot_6 + plot_7 +  plot_8 + shared_x + legend + plot_layout(design = fig_layout_lipid) & ylab(NULL) & xlab(NULL)) 
+figure_s10_nolabels_lipid <- (shared_y + plot_1 + plot_2 + plot_3 + plot_4 + plot_5 + plot_6 + plot_7 +  plot_8 + shared_x + legend + plot_layout(design = fig_layout_lipid) & ylab(NULL) & xlab(NULL)) 
 
 # Export Figure 7Cs .svg file
-  ggsave(file = paste("output\\plots\\",basename,adpdinfo,"Supplementary_Figure_8_","Lipid_partial",".svg", sep=""), plot=figure_s8_nolabels_lipid, width=(box_width*5), height=(box_height*3))
+  ggsave(file = paste("output\\plots\\",basename,adpdinfo,"Supplementary_Figure_10_","Lipid_partial",".svg", sep=""), plot=figure_s10_nolabels_lipid, width=(box_width*5), height=(box_height*3))
 
 ```
 
@@ -863,7 +863,7 @@ $~$
 
 ```{r plot_SuppFig_LipidMetab_print, fig.dim = c((box_width*5),(box_height*4))}
 # Printing plot for Markdown
-figure_s8_nolabels_lipid
+figure_s10_nolabels_lipid
 
 ```
 
@@ -871,15 +871,15 @@ figure_s8_nolabels_lipid
 <br/><br/>
 
 
-## Supplementary Figure 9
+## Supplementary Figure 11
 
-Supplementary Figure 9 shows 16 proteins that were found to be increased in ADD and are involved in Ubiquitin-proteasome mediated protein degradation.
+Supplementary Figure 11 shows 16 proteins that were found to be increased in ADD and are involved in Ubiquitin-proteasome mediated protein degradation.
 
 <br/><br/>
 
 To generate the final supplementary figure version in the manuscript, a few manual changes were made offline using a vector graphics editor:
 
-* Opened "Supplementary_Figure_9_Ubiquitin_partial.svg" file in Inkscape.
+* Opened "Supplementary_Figure_11_Ubiquitin_partial.svg" file in Inkscape.
 
 * Removed the background (3 parts).
 
@@ -895,7 +895,7 @@ To generate the final supplementary figure version in the manuscript, a few manu
 
 * Under menu tab "Edit" -> "Resize page to selection".
 
-* Re-saved as "Supplementary_Figure_9_Ubiquitin.svg"
+* Re-saved as "Supplementary_Figure_11_Ubiquitin.svg"
 
 $~$
 
@@ -984,10 +984,10 @@ y_axis_expression <- paste0(expression("Normalized Log"[2]~"(protein abundance)"
 
     
 # Applying patchwork layout and altering annotations specified above
-figure_s9_nolabels_ubiq <- (shared_y + plot_1 + plot_2 + plot_3 + plot_4 + plot_5 + plot_6 + plot_7 +  plot_8 + plot_9 + plot_10 + plot_11 + plot_12 + plot_13 + plot_14 + plot_15 + plot_16 + shared_x + legend + plot_layout(design = fig_layout_ubiq) & ylab(NULL) & xlab(NULL)) 
+figure_s11_nolabels_ubiq <- (shared_y + plot_1 + plot_2 + plot_3 + plot_4 + plot_5 + plot_6 + plot_7 +  plot_8 + plot_9 + plot_10 + plot_11 + plot_12 + plot_13 + plot_14 + plot_15 + plot_16 + shared_x + legend + plot_layout(design = fig_layout_ubiq) & ylab(NULL) & xlab(NULL)) 
 
 # Export Figure 7Cs .svg file
-  ggsave(file = paste("output\\plots\\",basename,adpdinfo,"Supplementary_Figure_9_","Ubiquitin_partial",".svg", sep=""), plot=figure_s9_nolabels_ubiq, width=(box_width*5), height=(box_height*5))
+  ggsave(file = paste("output\\plots\\",basename,adpdinfo,"Supplementary_Figure_11_","Ubiquitin_partial",".svg", sep=""), plot=figure_s11_nolabels_ubiq, width=(box_width*5), height=(box_height*5))
   
 ```
 
@@ -995,7 +995,7 @@ $~$
 
 ```{r plot_SuppFig_Ubiquitin_print, fig.dim = c((box_width*5),(box_height*4))}
 # Printing plot for Markdown
-figure_s9_nolabels_ubiq
+figure_s11_nolabels_ubiq
 
 ```
 

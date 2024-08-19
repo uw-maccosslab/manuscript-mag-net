@@ -1,0 +1,716 @@
+---
+title: "Supplementary Figure S3"
+author: "Kristine A. Tsantilas, PhD"
+date: "08/19/2024"
+output: 
+  html_document:
+      code_folding: hide
+      toc: true
+      toc_float:
+        collapsed: false
+---
+
+# Overview
+
+R Markdown to generate a Supplementary Figure examining the overlap of the ExoCarta extracellular vesicle database relative to proteins found in Mag-Net. The code produces Supplementary Figure S3.
+ 
+<br/><br/>
+
+
+## Experiment
+
+Characterization of Mag-Net enrichment of circulating membrane particles. The same dataset in "Figs_2C_3A_3B_5B__SuppFigs_S1_S5_S6.Rmd" in this repository which was used to generate Figures 2C, 3A, 3B, and Supplementary Figure S2
+
+<br/><br/>
+
+
+# Data Import and Formatting {.tabset .tabset-fade}
+
+## Input
+
+List of proteins found in exosomes per ExoCarta (ExoCarta_top100_protein_details_5.txt) under "Download" in the ExoCarta Download - 5 (Release date: 29 July 2015), Uniprot accession numbers mapped from genes in the ExoCarta list, and a dataframe output from the script where the protein fold-change data was processed in the R Markdown "Figs_2C_3A_3B_5B__SuppFigs_S1_S5_S6.Rmd" in this repository. The dated output was included in the GitHub **csv** folder.
+
+* EXOCARTA_PROTEIN_MRNA_DETAILS_5_2024_06_18.csv
+
+* EXOCARTA_PROTEIN_MRNA_DETAILS_5_idmapping_2024_06_18.csv
+
+* 2024May31_EnrichDeplet_TIC_FCtype.csv
+
+
+<br/><br/>
+
+
+## Output
+
+This R Markdown produces 1 Supplementary Figure as an svg file: 
+
+* ** Figure S2:** Histograms and volcano plots illustrating the overlap of the proteins found in Mag-Net relative to the top 1000 and the top 100 most frequently identified markers in exosomes at the protein-level from the ExoCarta database.
+
+$~$
+
+<br/><br/>
+
+
+## Software Information
+
+* Skyline Daily (64-bit)
+
+* R version: 4.3.2
+
+* R Studio version: 2023.03.0+386 "Cherry Blossom" Release (3c53477afb13ab959aeb5b34df1f10c237b256c3, 2023-03-09) for Windows
+Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) RStudio/2023.03.0+386 Chrome/108.0.5359.179 Electron/22.0.3 Safari/537.36
+
+* Packages required: 
+
+  + dplyr (version 1.1.4)
+  
+  + stringr (version 1.5.1)
+  
+  + tidyr (version 1.3.1)
+  
+  + ggplot2 (version 3.5.0)
+  
+  + ggrepel (version 0.9.5)
+
+  + knitr (version 1.45)
+  
+  + kableExtra (version 1.4.0)
+  
+  + eulerr (version 7.0.2)
+  
+  + patchwork (version 1.2.0)
+
+* Inkscape: 1.1 (c68e22c387, 2021-05-23)
+
+  
+<br/><br/>
+
+
+```{r package_installation, include=FALSE}
+
+# Download necessary packages for analysis
+library(dplyr)
+library(stringr)
+library(tidyr)
+library(ggplot2)
+library(ggrepel)
+library(knitr)
+library(kableExtra)
+library(eulerr)
+library(patchwork)
+
+# Check session info
+sessionInfo()
+
+```
+
+
+```{r setup, include=FALSE}
+# Set-up current date to include in filename output
+(today <- Sys.Date())
+basename <- today %>%
+            format(., "%Y%b%d") %>% # with month as a word
+            paste0(.,"_")
+
+# Set-up base filenames by dataset to classify filename output
+exocarta <- "exocarta_"
+
+```
+
+
+```{r setup_folders}
+
+directories <- c('output', 'output/plots', 'output/tables')
+
+for(c in directories){
+  if(!dir.exists(c)){
+    message(paste('Creating directory: ', c))
+    dir.create(c)
+  }}
+
+```
+
+
+<br/><br/>
+
+
+## File Import
+
+Importing data from ExoCarta and from Skyline.
+
+* The Protein/mRNA data was downloaded from ExoCarta on June 17, 2024 (ExoCarta Download - 5 (Release date: 29 July 2015)) under the "Download" tab.
+
+* Mag-Net protein-level data was extracted from Skyline's group comparison document grid.
+
+$~$
+
+```{r file_import}
+# ExoCarta data
+    # Import EV protein/mRNA list downloaded from ExoCarta on June 17, 2024 (ExoCarta Download - 5 (Release date: 29 July 2015))
+            ev_mrna_prot <- read.csv("csv\\EXOCARTA_PROTEIN_MRNA_DETAILS_5_2024_06_18.csv", 
+                                  header = TRUE,
+                                  na.strings="#N/A",
+                                  sep = ",")
+    
+    # Import the table generated in Uniprot containing the top human-only protein's gene names and the protein Accession numbers mapped to the gene names
+            id_mapping_human <- read.csv("csv\\EXOCARTA_PROTEIN_MRNA_DETAILS_5_idmapping_2024_06_18.csv",
+                                header = TRUE,
+                                na.strings="#N/A",
+                                sep = ",")
+
+# Mag-Net data
+        magnet_input <- read.csv("csv\\2024May31_EnrichDeplet_TIC_FCtype.csv",
+                              header = TRUE,
+                              na.strings="#N/A",
+                              sep = ",")
+
+```
+
+
+<br/><br/>
+
+## ExoCarta Protein List
+
+The downloaded protein list from ExoCarta was filtered to only include protein entries and those found in humans.
+
+$~$
+
+
+```{r exocarta_human}
+
+ev_prot_filtered <- ev_mrna_prot %>% 
+                    filter(CONTENT.TYPE == "protein") 
+
+ev_prot_human <- ev_prot_filtered %>% 
+                 filter(SPECIES == "Homo sapiens") 
+
+# Make all gene names capitalized.
+ev_prot_human$GENE.SYMBOL.C <- toupper(ev_prot_human$GENE.SYMBOL)
+                 
+
+ev_prot_human_counts <- ev_prot_human %>%
+                        group_by(GENE.SYMBOL.C) %>%
+                        summarise(unique_experiments = n_distinct(EXPERIMENT.ID)) %>%
+                        .[order(.$unique_experiments, decreasing = TRUE),] 
+
+
+write.csv(ev_prot_human_counts, paste("output//tables//",basename,exocarta,"human_ev_protein_list.csv", sep=""), quote=FALSE, row.names=FALSE)
+
+```
+
+$~$
+
+The downloaded gene IDs in the exported "2024Jun18_exocarta_human_ev_protein_list.csv" were matched to Uniprot Accession numbers using the "Retrieve/ID mapping" tool on _*Uniprot.org*_ and re-imported above as "EXOCARTA_PROTEIN_MRNA_DETAILS_5_idmapping_2024_06_18.csv".
+
+> 5,260 IDs were mapped to 5,409 results
+> 146 ID were not mapped
+
+$~$
+
+```{r import_manual_id_mapping}
+id_mapping_human_renamed <- id_mapping_human %>%
+                            rename("GENE.SYMBOL.C" = "From", 
+                                   "Protein.Accession" = "Entry")
+ev_human_list_ids <- full_join(ev_prot_human_counts, id_mapping_human_renamed, by = "GENE.SYMBOL.C")
+
+ev_human_list_ids_filtered <- ev_human_list_ids %>%
+                              filter(Protein.Accession != "NA")
+
+write.table(ev_human_list_ids_filtered, paste0("output//tables//",basename,exocarta,"human_ev_protein_ids.tsv"), quote=FALSE, row.names=FALSE, sep = "\t")
+
+```
+
+
+Selecting only the first accession in a protein group to avoid matching the same protein group twice within the ExoCarta data.
+
+```{r organizing_lists}
+ev_human_list_ids_top1k <- ev_human_list_ids_filtered %>%
+                           .[order(.$unique_experiments, decreasing = TRUE),] %>%
+                           slice_head(., n = 1000)
+
+
+magnet_input_first_accession <- magnet_input %>%
+                                mutate(Protein.Accession.First = str_extract(Protein.Accession, "\\w+"))
+
+# Overlap of full dataset
+magnet_all_exocarta_all <- merge(magnet_input_first_accession, ev_human_list_ids_filtered)
+
+
+# Overlap with just the top 1000
+magnet_all_exocarta_top1000 <- merge(magnet_input_first_accession, ev_human_list_ids_top1k)
+
+
+write.table(magnet_all_exocarta_top1000, paste0("output//tables//",basename,exocarta,"top1000_human_ev_proteins_magnet_all.tsv"), quote=FALSE, row.names=FALSE, sep = "\t")
+
+
+magnet_all_exocarta_top100 <- (magnet_all_exocarta_top1000 %>%
+                                .[order(.$unique_experiments, decreasing = TRUE),] %>%
+                                slice_head(., n = 100))
+
+```
+
+<br/><br/>
+
+
+# Figures {.tabset .tabset-fade}
+
+## Euler Diagrams
+
+```{r function_checkoverlap}
+# Function to check overlap quantities
+    check_overlap_sums <- function(original_quantity, overlap, leftover, dataset) {
+      if(overlap + leftover == original_quantity) {print(paste0("CONFIRMED: ", dataset, "Quantities add up"))}
+      if(overlap + leftover != original_quantity) {print(paste0("ERROR: ", dataset, "Quantities DO NOT add up - CHECK CODE/DATA"))}
+    }
+
+```
+
+
+```{r counts_list_totals}
+# Dataset sizes
+count_magnet_total <- nrow(magnet_input)
+count_exocarta_total <- nrow(ev_human_list_ids_filtered)
+
+```
+
+$~$
+
+#### Top 1000 proteins in ExoCarta
+
+```{r counts_by_list_exocarta_top1000}
+# Overlapping with top 1000
+count_exocarta_top1000_found_in_magnet <- nrow(magnet_all_exocarta_top1000)
+count_exocarta_top1000 <- 1000
+count_exocarta_top1000_leftover_exocarta <- count_exocarta_top1000 - count_exocarta_top1000_found_in_magnet
+count_exocarta_top1000_leftover_magnet <- count_magnet_total - count_exocarta_top1000_found_in_magnet
+
+    # Checking overlaps
+        check_overlap_sums(original_quantity = count_magnet_total,
+                           overlap = count_exocarta_top1000_found_in_magnet,
+                           leftover = count_exocarta_top1000_leftover_magnet,
+                               dataset = "Mag-Net (top 1000 exocarta list)")
+         
+        check_overlap_sums(original_quantity = count_exocarta_top1000,
+                           overlap = count_exocarta_top1000_found_in_magnet,
+                           leftover = count_exocarta_top1000_leftover_exocarta,
+                               dataset = "Exocarta (top 1000 list)")  
+
+# Eulerr diagram of top 1000 ExoCarta with Mag-Net
+    setfit_top1000 <- euler(c(A = count_exocarta_top1000_leftover_magnet, B = count_exocarta_top1000_leftover_exocarta, "A&B" = count_exocarta_top1000_found_in_magnet))
+    # setfit_top1000
+    
+    euler_diagram_top1000 <- plot(setfit_top1000, quantities = list(cex = 1.7), fills = list(fill = c("#5D3A9B","#E66100","gray"), alpha = 0.5), labels = list(cex = 1.7, labels = c(paste("Mag-Net"), paste("  ExoCarta\n(Top 1000)\n \n \n "), paste("Both"))))
+
+    # Export plot as svg
+    ggsave(file = paste0("output//plots//",basename,exocarta,"euler_exocarta_top1000_vs_magnet_all.svg"), plot=euler_diagram_top1000, width=7, height=5)
+
+    
+```
+
+
+```{r plot_euler_top1000_print, width=7, height=5}
+euler_diagram_top1000
+
+```
+
+$~$
+
+#### Top 100 proteins in ExoCarta
+
+```{r counts_by_list_exocarta_top100}
+# Overlapping with top 1000
+count_exocarta_top100_found_in_magnet <- nrow(magnet_all_exocarta_top100)
+count_exocarta_top100 <- 100
+count_exocarta_top100_leftover_exocarta <- count_exocarta_top100 - count_exocarta_top100_found_in_magnet
+count_exocarta_top100_leftover_magnet <- count_magnet_total - count_exocarta_top100_found_in_magnet
+
+    # Checking overlaps
+        check_overlap_sums(original_quantity = count_magnet_total,
+                           overlap = count_exocarta_top100_found_in_magnet,
+                           leftover = count_exocarta_top100_leftover_magnet,
+                               dataset = "Mag-Net (top 100 exocarta list)")
+         
+        check_overlap_sums(original_quantity = count_exocarta_top100,
+                           overlap = count_exocarta_top100_found_in_magnet,
+                           leftover = count_exocarta_top100_leftover_exocarta,
+                               dataset = "Exocarta (top 100 list)")  
+
+# Eulerr diagram of top 1000 ExoCarta with Mag-Net
+    setfit_top100 <- euler(c(A = count_exocarta_top100_leftover_magnet, B = count_exocarta_top100_leftover_exocarta, "A&B" = count_exocarta_top100_found_in_magnet))
+    # setfit_top1000
+    
+    euler_diagram_top100 <- plot(setfit_top100, quantities = list(cex = 1.7), fills = list(fill = c("#5D3A9B","#E66100","gray"), alpha = 0.5), labels = list(cex = 1.7, labels = c(paste("Mag-Net\n "), paste("\nExoCarta\n(Top 100)\n"), paste("Both"))))
+
+    # Export plot as svg
+    ggsave(file = paste0("output//plots//",basename,exocarta,"euler_exocarta_top100_vs_magnet_all.svg"), plot=euler_diagram_top100, width=7, height=5)
+
+    
+```
+
+
+```{r plot_euler_top100_print, width=7, height=5}
+euler_diagram_top100
+
+```
+
+
+<br/><br/>
+
+
+## Percentages
+
+Of the proteins that overlap between Mag-Net and ExoCarta, calculated what percent of those were enriched, depleted, or not significant in the particle-enriched samples relative to total plasma.
+
+* **Starting with the top 1000 ExoCarta proteins:**
+  - 729 found in Mag-Net
+  - 75.99% are enriched
+  - 6.04% are depleted
+  - 17.97% are not significant
+
+* **Starting with the top 100 ExoCarta proteins:**
+  - 100 found in Mag-Net
+  - 87% are enriched
+  - 3% are depleted
+  - 10% are not significant
+
+$~$
+
+```{r function_enrich_deplet_percent}
+# Proteins found in Mag-Net from all of ExoCarta (Calculated above)
+extract_percent_enr_dep <- function(dataframe, count_in_magnet, string_describing_list_used){
+    
+    subdata_enriched <- dataframe %>%
+                        filter(type == "Enriched")
+    
+    subdata_depleted <- dataframe %>%
+                        filter(type == "Depleted") 
+
+    subdata_ns <- dataframe %>%
+                  filter(type == "Not Significant") 
+    
+# Calculate percentages
+    percent_enriched <- ((nrow(subdata_enriched) / count_in_magnet) *100)
+    percent_enriched_formatted <- format(round(percent_enriched, digits = 2), nsmall = 2)
+    print(paste0(percent_enriched_formatted,"% enriched in ",string_describing_list_used))
+
+    percent_depleted <- ((nrow(subdata_depleted) / count_in_magnet) *100)
+    percent_depleted_formatted <- format(round(percent_depleted, digits = 2), nsmall = 2)
+    print(paste0(percent_depleted_formatted,"% depleted in ",string_describing_list_used))       
+    
+    percent_ns <- ((nrow(subdata_ns) / count_in_magnet) *100)
+    percent_ns_formatted <- format(round(percent_ns, digits = 2), nsmall = 2)
+    print(paste0(percent_ns_formatted,"% not significant in ",string_describing_list_used))  
+    
+    
+      if(sum(percent_enriched + percent_depleted + percent_ns) == 100) {print(paste0("CONFIRMED: ",string_describing_list_used," sums to 100%"))}
+      if(sum(percent_enriched + percent_depleted + percent_ns) != 100) {print(paste0("ERROR: ",string_describing_list_used," DOES NOT sum to 100% - CHECK CODE/DATA"))}
+    }
+
+
+```
+
+
+```{r overlap_fraction_enriched}
+# Proteins found in Mag-Net from top 1000 ExoCarta (Calculated above)
+extract_percent_enr_dep(dataframe = magnet_all_exocarta_top1000,
+                        count_in_magnet = count_exocarta_top1000_found_in_magnet,
+                        string_describing_list_used = "top 1000 from ExoCarta")
+
+# Proteins found in Mag-Net from top 100 ExoCarta (Calculated above)
+extract_percent_enr_dep(dataframe = magnet_all_exocarta_top100,
+                        count_in_magnet = count_exocarta_top100_found_in_magnet,
+                        string_describing_list_used = "top 100 from ExoCarta")
+
+```
+
+
+
+$~$
+
+<br/><br/>
+
+
+## Labeled Volcano Plot
+
+Taking the top 1000 or 100 protein hits by times observed from ExoCarta, plot a volcano plot of the -Log~10~(adjusted p-value) relative to the Log~2~(fold change) of those proteins also identified in Mag-Net and colored by their enrichment or depletion status. The top 15-most abundant proteins by the times observed in ExoCarta are labeled with their gene name and their data points re-colored.
+
+```{r function_volcano_plots, warning = FALSE}
+# Set aesthetic components of volcano plot to be generated in next section.
+    # Setting legend text
+        legendval <- "Protein Type"
+        
+    # Setting y- and x-axes
+        yaxval <- expression("-Log"[10]~"(adjusted p-value)")
+        xaxval <- expression("Log"[2]~"(fold change)")
+
+    # Setting p-value cutoff marking in figure (And setting to log 10 scale)
+        yaxFilter <- log(0.05, 10)
+    
+    # Setting depletion and enrichment value cutoff markings in figure (And setting to log 2 scale)
+        xaxFilterDeplet <- log(0.5, 2)
+        xaxFilterEnrich <- log(2, 2)
+
+        
+volcano_labeled <- function(dataframe, x_limits_volc, depletion_label_number, figure_height, figure_width, file_suffix){
+
+# Code for a ggplot2 object.
+volcanoplot_labeled <- ggplot(data=dataframe, aes(x=Log2FC, y=-Log10pValue, col=type, label=Protein.Accession)) + 
+  
+  # Add horizontal line representing significance cut-off of y = -Log10(0.05)
+  geom_hline(yintercept=-yaxFilter, linetype="dashed", color = "azure4", linewidth=0.75) +
+  # Add vertical lines representing depletion fold change cut-off of x = Log2(0.5), and enrichment fold change cut-off of x = Log2(2)
+  geom_vline(xintercept=xaxFilterDeplet, linetype="dashed", color = "azure4", linewidth=0.75) +
+  geom_vline(xintercept=xaxFilterEnrich, linetype="dashed", color = "azure4", linewidth=0.75) +
+  
+  # Set size and transparency of points.
+  geom_point(shape=19, alpha = 1, size = 4) + 
+  
+  # Add labels for most abundant exocarta proteins
+  geom_label_repel(data = (dataframe %>%
+                           .[order(.$unique_experiments, decreasing = TRUE),] %>%
+                           slice_head(., n = 15)),
+                  aes(label = Gene), 
+                  size = 7,
+                  seed = 42,
+                  max.overlaps = Inf,
+                  box.padding = 0.2,
+                  color = "black",
+                  show.legend = FALSE) + 
+  
+  # Add labels for protein found in the barplots
+  geom_label_repel(data = (dataframe %>%
+                           filter(., type == "Depleted") %>%
+                           .[order(.$unique_experiments, decreasing = TRUE),] %>%
+                           slice_head(., n = depletion_label_number)),
+                  aes(label = Gene), 
+                  size = 7,
+                  seed = 42,
+                  max.overlaps = Inf,
+                  box.padding = 0.2,
+                  color = "black",
+                  show.legend = FALSE) + 
+  
+  #Add point to clearly label proteins of interest.
+  geom_point(data = (dataframe %>%
+                     .[order(.$unique_experiments, decreasing = TRUE),] %>%
+                     slice_head(., n = 15)),
+                    aes(x=Log2FC, y=-Log10pValue), 
+                    shape=21, alpha = 1, size = 4, color = "black", fill="cyan") + 
+  
+  #Add point to clearly label proteins of interest.
+  geom_point(data = (dataframe %>%
+                     filter(., type == "Depleted") %>%
+                     .[order(.$unique_experiments, decreasing = TRUE),] %>%
+                     slice_head(., n = depletion_label_number)),
+                    aes(x=Log2FC, y=-Log10pValue), 
+                    shape=21, alpha = 1, size = 4, color = "black", fill="salmon") + 
+    
+  # Setting x-axis limits
+  scale_x_continuous(limits = x_limits_volc, expand = c(0, 0)) +
+  # Set minimal theme
+  theme_classic()+
+  # Remove major and minor grid lines, alter text and legend formatting.
+  theme(plot.margin=grid::unit(c(t = 0.2,  r = 0.4, b = 0, l = 0), "in"),  #0.1,0.4,0,0), "in"), # t, r, b, l 
+        axis.line.x.bottom = element_line(linewidth=2),
+        axis.line.y.left = element_line(linewidth=2),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        axis.title=element_text(size=24),
+        axis.text.x = element_text(size=24, color = "black"),
+        axis.text.y = element_text(size=24, color = "black"),
+        legend.position="none")+
+
+  # Add y-axis label and x-axis label
+  ylab(yaxval) +
+  xlab(xaxval) +
+
+  # Manually set color scale by category
+  scale_color_manual(values=c("Enriched"="blue", "Depleted"="red2", "Not Significant"="grey40"))
+
+# Export plot as svg
+ggsave(file = paste0("output//plots//",basename,exocarta,file_suffix,".svg"), plot=volcanoplot_labeled, width=figure_width, height=figure_height)
+
+volcanoplot_labeled
+
+}
+
+
+```
+
+```{r plot_volcano_plots, warning = FALSE, fig.show='hide'}
+# Setting scale for volcano plots
+    ratio <- 3.1/2.07
+    height_volc <- 8
+    width_volc <- height_volc*ratio
+
+# Remove comment to look at only the top 100 proteins
+    volcano_top1000exo  <-  volcano_labeled(dataframe = magnet_all_exocarta_top1000, 
+                                            x_limits_volc = c(-10,10), 
+                                            depletion_label_number = 5,
+                                            figure_height = height_volc, 
+                                            figure_width= width_volc, 
+                                            file_suffix ="volcano_magnet_all_exocarta_top1000_human_ev_labeled")
+
+
+# Only the top 100 proteins in ExoCarta
+    volcano_top100exo  <-  volcano_labeled(dataframe = magnet_all_exocarta_top100,
+                                           x_limits_volc = c(-10,10),
+                                           depletion_label_number = 3,
+                                           figure_height = height_volc,
+                                           figure_width= width_volc,
+                                           file_suffix ="volcano_magnet_all_exocarta_top100_human_ev_labeled")
+```
+
+$~$
+
+#### Top 1000 proteins in ExoCarta
+
+* Two data points that did not reach statistical significance with FCs greater than 13 were omitted from the volcano plot to improve visualization of the other data points and top ExoCarta protein labels. 
+
+```{r plot_volcano_top1000_print, warning = FALSE, width = width_volc, height = height_volc}
+
+volcano_top1000exo
+
+```
+
+$~$
+
+#### Top 100 proteins in ExoCarta
+
+```{r plot_volcano_top100_print, warning = FALSE, width = width_volc, height = height_volc}
+
+volcano_top100exo
+```
+
+$~$
+
+<br/><br/>
+
+## Histogram
+
+Taking the top 1000 protein hits by times observed from ExoCarta, plot a histogram of the counts of those proteins also identified in Mag-Net and colored by their enrichment or depletion status.
+
+
+```{r function_histogram, warning = FALSE, fig.show='hide'}
+plot_histogram <- function(dataframe, bin_width, x_limits_hist, figure_height, figure_width, file_suffix){
+
+histogram_plot<- (ggplot(dataframe, aes(x=Log2FC, color=type, fill = type)) + 
+                          geom_histogram(binwidth=bin_width, alpha=0.5, position = "identity") +
+                          theme_minimal()+
+                          # Remove major and minor grid lines, alter text and legend formatting.
+                          theme(plot.margin=grid::unit(c(t = 0.25,  r = 0.25, b = 0, l = 0), "in"), #  0,0,0,0), "in"),
+                                axis.line.x.bottom = element_blank(),
+                                axis.line.y.left = element_line(linewidth=2),
+                                panel.grid.major.x = element_blank(),
+                                panel.grid.major.y = element_blank(),
+                                panel.grid.minor.x = element_blank(),
+                                panel.grid.minor.y = element_blank(),
+                                axis.title = element_text(size=24),
+                                axis.text.x = element_text(size=22, color = "black"),
+                                axis.text.y = element_text(size=22, color = "black"),
+                                legend.position="none")+
+                          geom_hline(yintercept=0, linetype="solid", color = "black", linewidth=2) +
+                          geom_vline(xintercept=xaxFilterDeplet, linetype="dashed", color = "azure4", linewidth=0.6) +
+                          geom_vline(xintercept=xaxFilterEnrich, linetype="dashed", color = "azure4", linewidth=0.6) +
+                          ylab("Count") +
+                          scale_x_continuous(limits = x_limits_hist, expand = c(0, 0)) +
+                          scale_fill_manual(values=c("Enriched"="blue", "Depleted"="red2", "Not Significant"="grey40")) +
+                          scale_color_manual(values=c("Enriched"="blue", "Depleted"="red2", "Not Significant"="grey40")))
+
+ggsave(file = paste("output//plots//",basename,exocarta,"histogram_",file_suffix,".svg", sep = ""), plot=histogram_plot, width=figure_width, height=figure_height)
+
+histogram_plot
+
+}
+
+
+```
+
+
+
+```{r plot_histogram, warning = FALSE, fig.show='hide'}
+        xaxFilterDeplet <- log(0.5, 2)
+        xaxFilterEnrich <- log(2, 2)
+
+# Setting enrichment/depletion type as factor.
+        magnet_all_exocarta_top1000_histfactor <- magnet_all_exocarta_top1000
+        magnet_all_exocarta_top1000_histfactor$type <- factor(magnet_all_exocarta_top1000_histfactor$type, levels=c("Depleted", "Enriched", "Not Significant"))
+        # levels(magnet_all_exocarta_top1000_histfactor$type)
+        
+        magnet_all_exocarta_top100_histfactor <- magnet_all_exocarta_top100
+        magnet_all_exocarta_top100_histfactor$type <- factor(magnet_all_exocarta_top100_histfactor$type, levels=c("Depleted", "Enriched", "Not Significant"))
+        # levels(magnet_all_exocarta_top100_histfactor$type)
+
+        
+# Setting plot dimenstions        
+height_hist <- (height_volc-3)
+width_hist <- width_volc
+
+
+histogram_top1000exo  <-  plot_histogram(dataframe = magnet_all_exocarta_top1000_histfactor,
+                                  bin_width = 0.5,
+                                  x_limits_hist = c(-10,10),
+                                  figure_height = height_hist, 
+                                  figure_width = width_hist,                                   
+                                  file_suffix = "magnet_all_exocarta_top1000_human_ev")
+
+histogram_top100exo  <-  plot_histogram(dataframe = magnet_all_exocarta_top100_histfactor,
+                                  bin_width = 0.5,
+                                  x_limits_hist = c(-10,10),
+                                  figure_height = height_hist, 
+                                  figure_width = width_hist, 
+                                  file_suffix = "magnet_all_exocarta_top100_human_ev")
+
+```
+
+$~$
+
+#### Top 1000 proteins in ExoCarta
+
+* Two data points that did not reach statistical significance with FCs greater than 10 were omitted from the volcano plot to improve visualization of the other data points and top ExoCarta protein labels. 
+
+```{r plot_histogram_top1000_print, warning = FALSE, width = width_hist, height = height_hist}
+
+histogram_top1000exo
+
+```
+
+$~$
+
+#### Top 100 proteins in ExoCarta
+
+```{r plot_histogram_top100_print, warning = FALSE, width = width_hist, height = height_hist}
+
+histogram_top100exo
+
+```
+
+<br/><br/>
+
+## Figure S3
+
+```{r plot_supplementary_figure_s, warning = FALSE, fig.show='hide'}
+
+
+supp_height <- height_volc + height_hist
+supp_width <- width_volc + width_hist
+
+supp_height_ratio <- height_hist/supp_height
+
+supplementary_figure <- (histogram_top1000exo + histogram_top100exo + volcano_top1000exo + volcano_top100exo + plot_layout(heights = c(supp_height_ratio,(1-supp_height_ratio))) + plot_annotation(tag_levels = 'a') & theme(plot.tag = element_text(size = 45, face = "bold")))
+
+
+ggsave(file = paste("output//plots//",basename,exocarta,"Supplementary_Figure_2.svg", sep = ""), plot=supplementary_figure, width=supp_width, height=supp_height)
+
+```
+
+
+```{r plot_supplementary_figure_s_print, warning = FALSE, width = supp_width, height = supp_height}
+
+supplementary_figure
+
+```
+
+<br/><br/>

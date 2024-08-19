@@ -1,5 +1,5 @@
 ---
-title: "Figures 2C, 3A, 3B, 5B, and Supplementary Figures S1, S5 and S6"
+title: "Figures 2C, 3A, 3B, 5B, and Supplementary Figures S2, S7 and S8"
 author: "Kristine A. Tsantilas, PhD"
 date: "04/03/2024"
 output: 
@@ -37,7 +37,7 @@ Characterization of Mag-Net enrichment of circulating membrane particles.
   
 * Figure 3B
   
-* Supplementary Figure S1
+* Supplementary Figure S2
 
 <br/><br/>
 
@@ -47,7 +47,7 @@ Matrix-matched calibration curve used human plasma diluted with chicken plasma t
 
 * Figure 5B
     
-* Supplementary Figure S5
+* Supplementary Figure S7
 
 <br/><br/>
 
@@ -55,7 +55,7 @@ Matrix-matched calibration curve used human plasma diluted with chicken plasma t
 
 Assessing the impact of repeated plasma freeze-thaw cycles on Mag-Net enrichment
 
-* Supplementary Figure S6
+* Supplementary Figure S8
 
 <br/><br/>
 
@@ -108,11 +108,11 @@ This script produces:
   
   - Figure 5B (All peptide Log~2~ratios relative to 100% human plasma)
   
-  - Supplementary Figure S1 (Labeled volcano plot)
+  - Supplementary Figure S2 (Labeled volcano plot)
   
-  - Supplementary Figure S5 (Individual protein abundance panels - CD9, NCAM1 and APOB as separate files )
+  - Supplementary Figure S7 (Individual protein abundance panels - CD9, NCAM1 and APOB as separate files )
   
-  - Supplementary Figure S6 (Freeze thaw ratio relative to 1 freeze thaw cycle)
+  - Supplementary Figure S8 (Freeze thaw ratio relative to 1 freeze thaw cycle)
  
 * Various .csv files with subset of code steps
 
@@ -617,7 +617,7 @@ Simplified_FC_splitGroups <- Simplified_FC %>%
 ```
 
 
-## Supplementary Figure S1
+## Supplementary Figure S2
   
 $~$
 
@@ -1034,7 +1034,7 @@ indiv_xaxval <- expression("% Human")
 
 $~$
 
-## Suppmentary Figure S5 (CD9)
+## Suppmentary Figure S7 (CD9)
 
 ```{r MMCC_target_CD9}
 
@@ -1093,7 +1093,7 @@ $~$
   xlab(indiv_xaxval)
 
 # Saving CD9 plot as an .svg format.  
-ggsave(file = paste("output//plots//",basename,matrixinfo,"Supplementary_Figure_S5_","protein_CD9_","P21926.svg", sep = ""), plot=MM_plot_prot_cd9, width=5, height=3.5)
+ggsave(file = paste("output//plots//",basename,matrixinfo,"Supplementary_Figure_S7_","protein_CD9_","P21926.svg", sep = ""), plot=MM_plot_prot_cd9, width=5, height=3.5)
 
 # Printing summary of CD9 figures of merit
 print(paste0("Protein: ","CD9"," (P21926)"," | LOD: ",cd9_LOD," | LOQ: ",cd9_LOQ," | slope: ",cd9_slope," | intercept: ",cd9_intercept))
@@ -1109,7 +1109,7 @@ MM_plot_prot_cd9
 
 $~$
 
-## Suppmentary Figure S5 (NCAM1)
+## Suppmentary Figure S7 (NCAM1)
 
 ```{r MMCC_target_NCAM1, warning=FALSE, message=FALSE}
 
@@ -1169,7 +1169,7 @@ $~$
 
 
 # Saving NCAM1 plot as an .svg format.  
-ggsave(file = paste("output//plots//",basename,matrixinfo,"Supplementary_Figure_S5_","protein_NCAM1_","P13591.svg", sep = ""), plot=MM_plot_prot_ncam1, width=5, height=3.5)
+ggsave(file = paste("output//plots//",basename,matrixinfo,"Supplementary_Figure_S7_","protein_NCAM1_","P13591.svg", sep = ""), plot=MM_plot_prot_ncam1, width=5, height=3.5)
 
 # Printing summary of NCAM1 figures of merit
 print(paste0("Protein: ","NCAM1"," (P13591)"," | LOD: ",ncam1_LOD," | LOQ: ",ncam1_LOQ," | slope: ",ncam1_slope," | intercept: ",ncam1_intercept))
@@ -1186,7 +1186,7 @@ MM_plot_prot_ncam1
 
 $~$
 
-## Suppmentary Figure S5 (APOB)
+## Suppmentary Figure S7 (APOB)
 
 
 ```{r MMCC_target_APOB, warning=FALSE, message=FALSE}
@@ -1246,7 +1246,7 @@ $~$
   xlab(indiv_xaxval)
   
 # Saving SPOB plot as an .svg format.  
-ggsave(file = paste("output//plots//",basename,matrixinfo,"Supplementary_Figure_S5_","protein_APOB_","P04114.svg", sep = ""), plot=MM_plot_prot_apob, width=5, height=3.5)
+ggsave(file = paste("output//plots//",basename,matrixinfo,"Supplementary_Figure_S7_","protein_APOB_","P04114.svg", sep = ""), plot=MM_plot_prot_apob, width=5, height=3.5)
 
 # Printing summary of APOB figures of merit
 print(paste0("Protein: ","APOB"," (P04114)"," | LOD: ",apob_LOD," | LOQ: ",apob_LOQ," | slope: ",apob_slope," | intercept: ",apob_intercept))
@@ -1335,7 +1335,7 @@ $~$
 
 ```
 
-## Supplementary Figure S6
+## Supplementary Figure S8
 
 Examining the Log~2~ratio of each freeze-thaw cycle relative to 1 freeze-thaw cycle:
 
@@ -1385,7 +1385,7 @@ $~$
       scale_fill_manual(values=FT_PaletteBoxviol)
 
 # Saving plot as an .svg format. 
-ggsave(file = paste("output//plots//",basename,freezeinfo,"BHV_AllPeptides_Supplementary_Figure_S6.svg", sep = ""), plot=plot_FT_pep_boxviol, width=5, height=3.75)
+ggsave(file = paste("output//plots//",basename,freezeinfo,"BHV_AllPeptides_Supplementary_Figure_S8.svg", sep = ""), plot=plot_FT_pep_boxviol, width=5, height=3.75)
 
 
 ```
