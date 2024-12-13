@@ -80,7 +80,10 @@ DataWrangler <- R6Class(
     load_data = function(dat_path, meta_dt_path) {
       self$dat <- readr::read_csv(dat_path)
       self$meta_dt <- readr::read_csv(meta_dt_path) %>%
-        dplyr::mutate(across(everything(), ~dplyr::na_if(.x, "na")))
+        dplyr::mutate(
+          across(where(is.character), ~dplyr::na_if(.x, "na")),
+          across(where(is.numeric), ~ifelse(as.character(.x) == "na", NA, .x))
+        )
       self$rnames <- self$dat$Protein
     },
     
