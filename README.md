@@ -210,8 +210,8 @@ Details of script used broken down for each figure panel.
   - **1B:** Mag-Net method schematic. Generated in an image processor. No script or files on github.
 
 * Figure 2:
-  - **2A:** Peptide detections using different analytical pipelines. No script or files on github.
-  - **2B:** Protein detections using different analytical pipelines. No script or files on github.
+  - **2A:** Peptide detections using different analytical pipelines. Fig2a.ipynb.
+  - **2B:** Protein detections using different analytical pipelines. Fig2b.ipynb.
   - **2C:** Volcano plot annotated with protein counts. Panel and protein counts generated in "Figs_2C_3A_3B_5B__SuppFigs_S1_S5_S6.Rmd". Protein counts manually added using image processor.
   - **2D:** Image of top 10 Jensen Compartments from Enrichr tool. No script or files on github.
 
