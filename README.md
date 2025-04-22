@@ -53,6 +53,10 @@ Scripts are located in the **bin** folder.
   - Figure 7B
   - Supplementary figure S12
 
+* **Fig2a.ipynb and Fig2a.ipynb:** Jupyter Notebooks to generate the following figure panels:
+  - Figure 2a
+  - Figure 2b
+
 * **Fig2c_Fig4a_Fig4b.r:** R script that is used to generate the following figure panels:
 
   - Figure 3C
