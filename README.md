@@ -1,4 +1,5 @@
 # Mag-Net
+[![DOI](https://zenodo.org/badge/649092539.svg)](https://doi.org/10.5281/zenodo.15273142)
 
 This repo contains most of the input files and the basic analyses used in the manuscript "Mag-Net: Rapid enrichment of membrane-bound particles enables high coverage quantitative analysis of the plasma proteome", which is currently located on bioRxiv under the DOI [10.1101/2023.06.10.544439](https://doi.org/10.1101/2023.06.10.544439). Any files not located here are freely and openly accessible on the [Mag-Net page of PanoramaWeb](https://panoramaweb.org/Mag-Net.url). MS data files can also be found on ProteomeXchange under the unique identifier [PXD042947](https://proteomecentral.proteomexchange.org/cgi/GetDataset?ID=PXD042947).
 
